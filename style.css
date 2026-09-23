@@ -13,12 +13,21 @@
   --primary-color: #6a0dad;
   --primary-dark: #4b0082;
   --primary-light: #8a2be2;
+  /* Roxo legível sobre fundo escuro (5.30:1) — o #6a0dad dá só 1.88:1 */
+  --primary-on-dark: #b06ef5;
+  /* Cinza legível sobre fundo escuro (6.90:1) — o #666 dá só 3.03:1 */
+  --muted-on-dark: #a3a3a3;
   --secondary-color: #ffffff;
   --dark-bg: #1A1A1A;
   --light-bg: #F5F5F5;
   --text-dark: #333333;
   --text-light: #666666;
   --text-white: #FFFFFF;
+  /* WhatsApp: verde da marca com texto escuro (8.37:1).
+     Texto branco sobre #25d366 daria só 1.98:1 */
+  --wa-green: #25d366;
+  --wa-green-hover: #1eb85a;
+  --wa-text: #04240f;
   --gradient-1: linear-gradient(135deg, #6a0dad 0%, #4b0082 100%);
   --gradient-2: linear-gradient(135deg, #6a0dad 0%, #8a2be2 100%);
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -81,54 +90,18 @@ section[id],
 a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid var(--primary-light);
+  outline: 3px solid var(--primary-on-dark);
   outline-offset: 3px;
 }
 
-/* Loader Animation */
-.loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--dark-bg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  transition: opacity 0.5s, visibility 0.5s;
-}
-
-.loader.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.loader-content {
-  text-align: center;
-  color: var(--text-white);
-}
-
-.loader-spinner {
-  width: 80px;
-  height: 80px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.loader-progress {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-color);
+/* Ícones SVG inline (substituem o Font Awesome) */
+.icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  flex-shrink: 0;
 }
 
 /* Navegação */
@@ -177,7 +150,7 @@ nav.scrolled {
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
 }
 
 .nav-links a::after {
@@ -240,7 +213,7 @@ nav.scrolled {
 
 .dropdown a:hover {
   background: rgba(106, 13, 173, 0.2);
-  color: var(--primary-light) !important;
+  color: var(--primary-on-dark) !important;
 }
 
 /* Hambúrguer */
@@ -281,12 +254,12 @@ nav.scrolled {
   right: 30px;
   width: 60px;
   height: 60px;
-  background: #25d366;
+  background: var(--wa-green);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--wa-text);
   font-size: 2rem;
   box-shadow: var(--shadow-lg);
   z-index: 99;
@@ -297,7 +270,7 @@ nav.scrolled {
 
 .whatsapp-btn:hover {
   transform: scale(1.1);
-  background: #128C7E;
+  background: var(--wa-green-hover);
 }
 
 @keyframes pulse {
@@ -368,7 +341,7 @@ nav.scrolled {
 }
 
 .hero-title span {
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
   display: inline-block;
   animation: glow 2s ease-in-out infinite;
 }
@@ -432,14 +405,15 @@ nav.scrolled {
 }
 
 .btn-whatsapp {
-  background: #25d366;
-  border-color: #25d366;
-  color: var(--text-white);
+  background: var(--wa-green);
+  border-color: var(--wa-green);
+  color: var(--wa-text);
 }
 
 .btn-whatsapp:hover {
-  background: #128C7E;
-  border-color: #128C7E;
+  background: var(--wa-green-hover);
+  border-color: var(--wa-green-hover);
+  color: var(--wa-text);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -558,6 +532,14 @@ section {
   color: var(--text-white);
 }
 
+.services .section-title span {
+  color: var(--primary-on-dark);
+}
+
+.services .section-subtitle {
+  color: var(--muted-on-dark);
+}
+
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -583,8 +565,8 @@ section {
 /* Destaque quando o usuário chega via link âncora */
 .service-card:target {
   background: rgba(106, 13, 173, 0.3);
-  border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.4);
+  border-color: var(--primary-on-dark);
+  box-shadow: 0 0 0 3px rgba(176, 110, 245, 0.5);
 }
 
 /* Card clicável (Painel de LED) */
@@ -600,7 +582,7 @@ section {
   padding: 8px 18px;
   border-radius: 50px;
   background: rgba(106, 13, 173, 0.3);
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--primary-on-dark);
   color: var(--text-white);
   font-size: 0.75rem;
   font-weight: 600;
@@ -611,7 +593,7 @@ section {
 
 .service-icon {
   font-size: 3rem;
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
   margin-bottom: 20px;
 }
 
@@ -711,6 +693,14 @@ section {
   color: var(--text-white);
 }
 
+.contact .section-title span {
+  color: var(--primary-on-dark);
+}
+
+.contact .section-subtitle {
+  color: var(--muted-on-dark);
+}
+
 .contact-actions {
   text-align: center;
   margin-top: 30px;
@@ -756,14 +746,14 @@ footer {
 }
 
 .footer-social a:hover {
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
   transform: translateY(-3px);
 }
 
 .footer-links h4 {
   margin-bottom: 20px;
   font-size: 1.1rem;
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
 }
 
 .footer-links ul {
@@ -781,7 +771,7 @@ footer {
 }
 
 .footer-links a:hover {
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
 }
 
 .footer-bottom {
@@ -840,7 +830,7 @@ footer {
 }
 
 .led-modal-close:hover {
-  color: var(--primary-light);
+  color: var(--primary-on-dark);
 }
 
 .led-modal .section-title {

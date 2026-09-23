@@ -5,43 +5,6 @@
 (function () {
   'use strict';
 
-  /* ---------- Loader ----------
-     Oculta quando a página carrega OU após 2.5s, o que vier primeiro.
-     Evita a "tela preta" caso algum recurso externo nunca carregue. */
-  var loader = document.getElementById('loader');
-  var loaderProgress = document.getElementById('loader-progress');
-  var loaderHidden = false;
-
-  function hideLoader() {
-    if (loaderHidden || !loader) return;
-    loaderHidden = true;
-    if (loaderProgress) loaderProgress.textContent = '100%';
-    loader.classList.add('hidden');
-    setTimeout(function () {
-      if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
-    }, 600);
-  }
-
-  if (loader) {
-    var progress = 0;
-    var interval = setInterval(function () {
-      progress += Math.floor(Math.random() * 10) + 5;
-      if (progress >= 90) progress = 90;
-      if (loaderProgress) loaderProgress.textContent = progress + '%';
-    }, 100);
-
-    window.addEventListener('load', function () {
-      clearInterval(interval);
-      hideLoader();
-    });
-
-    // Falha segura: nunca deixa o loader preso
-    setTimeout(function () {
-      clearInterval(interval);
-      hideLoader();
-    }, 2500);
-  }
-
   /* ---------- Navbar com fundo ao rolar ---------- */
   var navbar = document.getElementById('navbar');
   var scrollTopBtn = document.getElementById('scrollTop');
