@@ -1,0 +1,17 @@
+{
+  "name": "tagsomeluz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing page da TAG Som e Luz — sem build, sem bundler. Os scripts abaixo são só verificação.",
+  "scripts": {
+    "test": "npm run test:contrast && npm run test:contrast:feira && npm run test:static && npm run test:runtime",
+    "test:contrast": "node tools/contrast-after.js",
+    "test:contrast:feira": "node tools/contrast-feira.js",
+    "test:static": "node tools/validate.js",
+    "test:runtime": "node tools/runtimetest.js",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1"
+  }
+}

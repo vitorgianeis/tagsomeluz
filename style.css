@@ -319,7 +319,7 @@ nav.scrolled {
   min-height: 100svh;
   background:
     linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')
+    url('assets/hero.webp')
     center / cover no-repeat var(--dark-bg);
   display: flex;
   align-items: center;
@@ -878,6 +878,250 @@ footer {
   margin-top: 30px;
 }
 
+/* ========== MARCADOR DE DADO PENDENTE ==========
+   Aparece enquanto um dado (CNPJ, número, CEP) não foi informado.
+   Estilizado de propósito para ninguém publicar sem perceber. */
+.tbd {
+  display: inline-block;
+  background: #FFD54F;
+  color: #3E2C00;
+  border: 1px dashed #B26A00;
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* ========== SEÇÃO DA FEIRA ========== */
+.fair {
+  background: linear-gradient(160deg, #1A1A1A 0%, #2A1140 55%, #1A1A1A 100%);
+  color: var(--text-white);
+  text-align: center;
+}
+
+.fair .section-title {
+  color: var(--text-white);
+}
+
+.fair .section-title span {
+  color: var(--primary-on-dark);
+}
+
+.fair .section-subtitle {
+  color: var(--muted-on-dark);
+  margin-bottom: 45px;
+}
+
+.fair-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 8px 20px;
+  border-radius: 50px;
+  background: rgba(176, 110, 245, 0.08);
+  border: 1px solid var(--primary-on-dark);
+  color: var(--primary-on-dark);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.fair-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 45px;
+}
+
+.fair-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius);
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.fair-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--primary-on-dark);
+}
+
+.fair-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--primary-on-dark);
+  margin-bottom: 6px;
+}
+
+.fair-label {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-on-dark);
+}
+
+.fair-card strong {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-white);
+}
+
+.fair-note {
+  font-size: 0.85rem;
+  color: var(--muted-on-dark);
+}
+
+/* Contagem regressiva */
+.fair-countdown {
+  margin-bottom: 45px;
+}
+
+.fair-countdown-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted-on-dark);
+  margin-bottom: 14px;
+}
+
+.fair-countdown-grid {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.fair-countdown-grid > div {
+  min-width: 92px;
+  padding: 16px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(176, 110, 245, 0.35);
+  border-radius: var(--border-radius);
+}
+
+.fair-countdown-grid span {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--primary-on-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.fair-countdown-grid small {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-on-dark);
+}
+
+/* Ações da feira */
+.fair-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.fair-cta {
+  text-align: left;
+}
+
+.fair-cta-note {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  color: var(--muted-on-dark);
+  max-width: 340px;
+}
+
+.fair-qr {
+  margin: 0;
+  padding: 16px;
+  background: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.fair-qr img {
+  width: 132px;
+  height: 132px;
+  display: block;
+}
+
+.fair-qr figcaption {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #1A1A1A;
+  line-height: 1.4;
+}
+
+.fair-countdown.is-past .fair-countdown-grid {
+  display: none;
+}
+
+/* ========== ENDEREÇO E DADOS LEGAIS ========== */
+.contact-address {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-style: normal;
+  text-align: center;
+  color: var(--muted-on-dark);
+  margin: 0 auto 35px;
+  max-width: 700px;
+}
+
+.contact-address .icon {
+  color: var(--primary-on-dark);
+}
+
+.footer-legal {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-legal p {
+  margin-bottom: 6px;
+}
+
+.footer-legal p:last-child {
+  margin-bottom: 0;
+}
+
+.footer-legal strong {
+  color: var(--text-white);
+}
+
 /* Responsividade */
 @media (min-width: 769px) {
   .hero {
@@ -1046,5 +1290,61 @@ footer {
 
   .hero {
     background-attachment: scroll;
+  }
+}
+
+/* ========== RESPONSIVO — feira e blocos novos ========== */
+@media (max-width: 768px) {
+  .fair-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .fair-card {
+    padding: 20px 12px;
+  }
+
+  .fair-card strong {
+    font-size: 0.95rem;
+  }
+
+  .fair-countdown-grid {
+    gap: 8px;
+  }
+
+  .fair-countdown-grid > div {
+    min-width: 72px;
+    padding: 12px 6px;
+  }
+
+  .fair-countdown-grid span {
+    font-size: 1.7rem;
+  }
+
+  .fair-actions {
+    gap: 26px;
+  }
+
+  .fair-cta {
+    text-align: center;
+    width: 100%;
+  }
+
+  .fair-cta-note {
+    max-width: none;
+  }
+
+  .contact-address {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .footer-legal {
+    font-size: 0.8rem;
+    padding: 16px 12px;
+  }
+
+  .tbd {
+    white-space: normal;
   }
 }

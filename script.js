@@ -218,6 +218,44 @@
   }, { passive: true });
   updateActiveNav();
 
+  /* ---------- Contagem regressiva da feira ---------- */
+  var countdown = document.getElementById('countdown');
+  if (countdown) {
+    var deadline = new Date(countdown.dataset.deadline).getTime();
+    var units = {
+      days: countdown.querySelector('[data-unit="days"]'),
+      hours: countdown.querySelector('[data-unit="hours"]'),
+      minutes: countdown.querySelector('[data-unit="minutes"]'),
+      seconds: countdown.querySelector('[data-unit="seconds"]')
+    };
+    var timer = null;
+
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+    function tick() {
+      var diff = deadline - Date.now();
+
+      if (diff <= 0) {
+        // Evento encerrado: mostra uma frase no lugar dos números
+        clearInterval(timer);
+        timer = null;
+        countdown.classList.add('is-past');
+        var title = countdown.querySelector('.fair-countdown-title');
+        if (title) title.textContent = 'A feira já aconteceu — veja o que preparamos no portfólio';
+        return;
+      }
+
+      var s = Math.floor(diff / 1000);
+      units.days.textContent = String(Math.floor(s / 86400));
+      units.hours.textContent = pad(Math.floor((s % 86400) / 3600));
+      units.minutes.textContent = pad(Math.floor((s % 3600) / 60));
+      units.seconds.textContent = pad(s % 60);
+    }
+
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
   /* ---------- Ano do rodapé ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
