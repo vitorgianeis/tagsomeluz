@@ -2,9 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
+const cssFile = path.join(root, 'css/style.css');
+const jsFile = path.join(root, 'js/script.js');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
-const js = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+const css = fs.readFileSync(cssFile, 'utf8');
+const js = fs.readFileSync(jsFile, 'utf8');
+const cssDir = path.dirname(cssFile); // urls do CSS são relativas à pasta css/
 
 const problems = [];
 const ok = [];
@@ -20,14 +23,19 @@ missingAnchors.length
   : ok.push(`todas as ${anchors.length} âncoras internas têm id (ids: ${[...ids].join(', ')})`);
 
 // 2. arquivos locais referenciados existem
-const refs = [...html.matchAll(/(?:src|href|data-src)="([^"#][^"]*)"/g)].map(m => m[1])
-  .concat([...css.matchAll(/url\(['"]?([^'")]+)['"]?\)/g)].map(m => m[1]));
-const local = [...new Set(refs)].filter(u =>
-  !/^(https?:)?\/\/|^mailto:|^tel:|^data:/.test(u));
-const missingFiles = local.filter(u => !fs.existsSync(path.join(root, u)));
+//    (HTML é relativo à raiz; CSS é relativo à pasta css/)
+const isRemote = u => /^(https?:)?\/\/|^mailto:|^tel:|^data:/.test(u);
+const htmlRefs = [...new Set([...html.matchAll(/(?:src|href|data-src)="([^"#][^"]*)"/g)].map(m => m[1]))]
+  .filter(u => !isRemote(u));
+const cssRefs = [...new Set([...css.matchAll(/url\(['"]?([^'")]+)['"]?\)/g)].map(m => m[1]))]
+  .filter(u => !isRemote(u));
+const missingFiles = [
+  ...htmlRefs.filter(u => !fs.existsSync(path.join(root, u))),
+  ...cssRefs.filter(u => !fs.existsSync(path.resolve(cssDir, u))),
+];
 missingFiles.length
   ? problems.push('arquivos ausentes: ' + missingFiles.join(', '))
-  : ok.push(`todos os ${local.length} arquivos locais referenciados existem`);
+  : ok.push(`todos os ${htmlRefs.length + cssRefs.length} arquivos locais referenciados existem`);
 
 // 3. nenhum caminho absoluto com barra inicial (quebra no GitHub Pages)
 const absPaths = [...html.matchAll(/(?:src|href)="(\/[^"]*)"/g)].map(m => m[1]);
@@ -37,7 +45,7 @@ absPaths.length
 
 // 4. <link> do CSS dentro do <head>
 const headEnd = html.indexOf('</head>');
-const cssLink = html.indexOf('href="style.css"');
+const cssLink = html.indexOf('href="css/style.css"');
 cssLink !== -1 && cssLink < headEnd
   ? ok.push('<link> do CSS está dentro do <head>')
   : problems.push('<link> do CSS fora do <head>');
@@ -54,8 +62,8 @@ if (/<meta charset/i.test(head) && /viewport/i.test(head)) ok.push('charset + vi
 else problems.push('charset/viewport ausentes no <head>');
 
 // 7. script com defer e fora do head bloqueante
-if (/<script src="script\.js" defer><\/script>/.test(html)) ok.push('script.js com defer');
-else problems.push('script.js sem defer');
+if (/<script src="js\/script\.js" defer><\/script>/.test(html)) ok.push('js/script.js com defer');
+else problems.push('js/script.js sem defer');
 
 // 8. loader removido (não deve mais existir)
 if (/class="loader"|\.loader\s*\{|getElementById\('loader'\)/.test(html + css + js)) {
@@ -163,10 +171,10 @@ else problems.push('título do modal pode ficar ilegível');
 // 21. hero local (sem dependência de terceiros) + preload
 if (/unsplash/i.test(html + css)) problems.push('hero ainda depende do Unsplash');
 else ok.push('hero usa imagem local (sem dependência de terceiros)');
-if (/rel="preload" as="image" href="assets\/hero\.webp"/.test(html)) ok.push('hero com <link rel="preload"> (LCP)');
+if (/rel="preload" as="image" href="assets\/img\/hero\.webp"/.test(html)) ok.push('hero com <link rel="preload"> (LCP)');
 else problems.push('hero sem preload');
 const heroBg = (css.match(/url\('([^']*hero[^']*)'\)/) || [])[1];
-if (heroBg && fs.existsSync(path.join(root, heroBg))) ok.push(`background do hero aponta pra ${heroBg} (existe)`);
+if (heroBg && fs.existsSync(path.resolve(cssDir, heroBg))) ok.push(`background do hero aponta pra ${heroBg} (existe)`);
 else problems.push('background do hero não resolve pra arquivo existente');
 
 // 22. posters dos vídeos

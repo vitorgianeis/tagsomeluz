@@ -319,7 +319,7 @@ nav.scrolled {
   min-height: 100svh;
   background:
     linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url('assets/hero.webp')
+    url('../assets/img/hero.webp')
     center / cover no-repeat var(--dark-bg);
   display: flex;
   align-items: center;

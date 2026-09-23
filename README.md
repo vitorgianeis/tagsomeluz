@@ -9,20 +9,23 @@ Site publicado via **GitHub Pages**: <https://vitorgianeis.github.io/tagsomeluz/
 ```
 .
 ├── index.html      # página única (one page)
-├── style.css       # estilos e responsividade
-├── script.js       # menu, modal do LED, rolagem suave, contagem da feira
+├── css/
+│   └── style.css   # estilos e responsividade
+├── js/
+│   └── script.js   # menu, modal do LED, rolagem suave, contagem da feira
+├── assets/
+│   ├── img/        # fotos do portfólio, equipe e o logo
+│   ├── poster/     # capa de cada vídeo do modal (12 arquivos)
+│   ├── qr/         # qr-whatsapp.svg (usado na página) e qr-site.svg (impresso)
+│   └── video/      # painel de LED (12 mp4)
 ├── robots.txt
-├── sitemap.xml
+├── sitemap.xml     # precisa ficar na raiz do domínio
 ├── package.json    # só verificação (npm test) — o site não tem build
-├── tools/          # as 4 rotinas de checagem
-└── assets/
-    ├── hero.webp        # imagem de fundo do hero (1920×1080, local)
-    ├── posters/*.jpg    # capa de cada vídeo do modal (12 arquivos)
-    ├── qr-whatsapp.svg  # QR usado na seção da feira
-    ├── qr-site.svg      # QR do site — é para material impresso
-    ├── videos/*.mp4     # painel de LED
-    └── *.jpg|*.webp     # logo e fotos do portfólio
+└── tools/          # as 4 rotinas de checagem
 ```
+
+`index.html`, `robots.txt` e `sitemap.xml` ficam na raiz de propósito: o
+GitHub Pages serve da raiz e o `robots.txt`/`sitemap.xml` só são lidos lá.
 
 ## Como rodar localmente
 
@@ -41,24 +44,24 @@ Depois abra <http://localhost:8000>.
    - *Branch*: `main` / `(root)`
 2. Toda alteração enviada para `main` atualiza o site automaticamente.
 
-> Os caminhos são relativos (`style.css`, `assets/...`), então a página funciona
-> tanto na raiz do domínio quanto em `/tagsomeluz/`.
+> Os caminhos são relativos (`css/style.css`, `assets/...`), então a página
+> funciona tanto na raiz do domínio quanto em `/tagsomeluz/`.
 
 ## Onde editar o conteúdo
 
 | O quê | Onde |
 | --- | --- |
 | Textos e seções | `index.html` |
-| Cores da marca | `style.css` → bloco `:root` (`--primary-color`, etc.) |
-| Número do WhatsApp | `index.html` e `script.js` → `5516981719596` |
-| Fotos do portfólio | `assets/*.jpg` (mantenha o nome do arquivo) |
-| Vídeos do modal | `assets/videos/video1..12.mp4` |
-| Capa dos vídeos | `assets/posters/*.jpg` (uma por vídeo) |
-| Imagem do hero | `assets/hero.webp` (+ `<link rel="preload">` no `<head>`) |
+| Cores da marca | `css/style.css` → bloco `:root` (`--primary-color`, etc.) |
+| Número do WhatsApp | `index.html` e `js/script.js` → `5516981719596` |
+| Fotos do portfólio | `assets/img/*.jpg` (mantenha o nome do arquivo) |
+| Vídeos do modal | `assets/video/video1..12.mp4` |
+| Capa dos vídeos | `assets/poster/*.jpg` (uma por vídeo) |
+| Imagem do hero | `assets/img/hero.webp` (+ `<link rel="preload">` no `<head>`) |
 | Data/hora da feira | `index.html` → `id="countdown"` → `data-deadline` |
 
 > As capas dos vídeos saem dos próprios `.mp4` com ffmpeg:
-> `ffmpeg -ss <segundos> -i assets/videos/video1.mp4 -frames:v 1 -vf scale=640:-2 -q:v 4 assets/posters/video1.jpg`
+> `ffmpeg -ss <segundos> -i assets/video/video1.mp4 -frames:v 1 -vf scale=640:-2 -q:v 4 assets/poster/video1.jpg`
 
 ## ⚠ Dados pendentes
 
@@ -75,16 +78,16 @@ Falta informar:
 
 Para preencher, procure o texto amarelo em `index.html` e troque
 `<span class="tbd">TEXTO</span>` pelo valor real. Quando não sobrar nenhum
-`.tbd`, remova a regra `.tbd` de `style.css` (é opcional — não atrapalha).
+`.tbd`, remova a regra `.tbd` de `css/style.css` (é opcional — não atrapalha).
 O `npm run test:static` confirma quando zerar.
 
 ## QR Code
 
-`assets/qr-site.svg` aponta para `https://vitorgianeis.github.io/tagsomeluz/`.
+`assets/qr/qr-site.svg` aponta para `https://vitorgianeis.github.io/tagsomeluz/`.
 Se o site passar para `tagsomeluz.com.br`, regenere antes de mandar imprimir:
 
 ```bash
-npx qrcode -t svg -o assets/qr-site.svg https://tagsomeluz.com.br
+npx qrcode -t svg -o assets/qr/qr-site.svg https://tagsomeluz.com.br
 ```
 
 ## Verificação

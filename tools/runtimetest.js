@@ -4,7 +4,7 @@ const { JSDOM } = require('jsdom');
 const path = require('path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(`${root}/index.html`, 'utf8');
-const js = fs.readFileSync(`${root}/script.js`, 'utf8');
+const js = fs.readFileSync(`${root}/js/script.js`, 'utf8');
 
 const problems = [];
 const ok = [];
@@ -204,8 +204,8 @@ assert(!cd.classList.contains('is-past'), 'não marca como encerrado antes da ho
 // --- posters e sprite ---
 const posterEls = [...document.querySelectorAll('video[poster]')];
 assert(posterEls.length === 12, `12 vídeos com poster (achados: ${posterEls.length})`);
-assert(posterEls.every(v => /^assets\/posters\/video\d+\.jpg$/.test(v.getAttribute('poster'))),
-  'todos os posters apontam pra assets/posters/');
+assert(posterEls.every(v => /^assets\/poster\/video\d+\.jpg$/.test(v.getAttribute('poster'))),
+  'todos os posters apontam pra assets/poster/');
 
 // --- marcadores de dado pendente ---
 const tbds = document.querySelectorAll('.tbd');
