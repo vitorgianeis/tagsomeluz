@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vitorgianeis.github.io/tagsomeluz/sitemap.xml

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>TAG Som e Luz | Locação de Equipamentos para Eventos em São Carlos</title>
+  <meta name="description" content="TAG Som e Luz - Locação de equipamentos de som, iluminação, painel de LED e vídeo para eventos em São Carlos e região. Qualidade e profissionalismo para seu evento.">
+  <meta name="keywords" content="som e luz, locação de som, iluminação para eventos, painel de led, sonorização, dj, eventos são carlos">
+  <meta name="author" content="TAG Som e Luz">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#6a0dad">
+
+  <link rel="canonical" href="https://vitorgianeis.github.io/tagsomeluz/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vitorgianeis.github.io/tagsomeluz/">
+  <meta property="og:site_name" content="TAG Som e Luz">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:title" content="TAG Som e Luz | Locação de Equipamentos para Eventos">
+  <meta property="og:description" content="Especialistas em som, iluminação, painel de LED e vídeo para eventos sociais e corporativos em São Carlos. Qualidade e profissionalismo garantidos.">
+  <meta property="og:image" content="https://vitorgianeis.github.io/tagsomeluz/assets/logo.png">
+  <meta property="og:image:alt" content="Logo TAG Som e Luz">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:url" content="https://vitorgianeis.github.io/tagsomeluz/">
+  <meta name="twitter:title" content="TAG Som e Luz | Locação de Equipamentos para Eventos">
+  <meta name="twitter:description" content="Especialistas em som, iluminação, painel de LED e vídeo para eventos sociais e corporativos em São Carlos. Qualidade e profissionalismo garantidos.">
+  <meta name="twitter:image" content="https://vitorgianeis.github.io/tagsomeluz/assets/logo.png">
+  <meta name="twitter:image:alt" content="Logo TAG Som e Luz">
+
+  <!-- Favicon (caminhos relativos: funcionam na raiz e em /tagsomeluz/) -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="apple-touch-icon" href="assets/logo.png">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KDMDJTS34D"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KDMDJTS34D');
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (versão estável) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+
+  <!-- Sem JS o loader não pode bloquear a página -->
+  <noscript><style>.loader{display:none !important;}</style></noscript>
+</head>
+
+<body>
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="loader-content">
+      <div class="loader-spinner"></div>
+      <div class="loader-progress" id="loader-progress">0%</div>
+    </div>
+  </div>
+
+  <a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- Navegação -->
+  <nav id="navbar" aria-label="Navegação principal">
+    <a href="#home" class="logo">
+      <img src="assets/logo.png" alt="TAG Som e Luz" width="50" height="50" style="height: 50px; width: auto;">
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="active">Home</a></li>
+      <li><a href="#sobre">Sobre</a></li>
+      <li class="has-dropdown">
+        <a href="#servicos">Serviços <i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+        <ul class="dropdown">
+          <li><a href="#som">Som Profissional</a></li>
+          <li><a href="#iluminacao">Iluminação Cênica</a></li>
+          <li><a href="#led">Painel de LED</a></li>
+          <li><a href="#video">Vídeo &amp; Projeção</a></li>
+          <li><a href="#dj">Equipamento para DJ</a></li>
+          <li><a href="#estrutura">Estrutura (Truss/Grid)</a></li>
+        </ul>
+      </li>
+      <li><a href="#portfolio">Portfólio</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+      <span class="line1"></span>
+      <span class="line2"></span>
+      <span class="line3"></span>
+    </button>
+  </nav>
+
+  <!-- Botão WhatsApp -->
+  <a href="https://wa.me/5516981719596" target="_blank" rel="noopener" class="whatsapp-btn" aria-label="Falar no WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+  </a>
+
+  <!-- Botão Voltar ao Topo -->
+  <button class="scroll-top" id="scrollTop" aria-label="Voltar ao topo">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+
+  <main id="conteudo">
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span>TAG</span> Som e Luz
+      </h1>
+      <p class="hero-subtitle">Transformamos seu evento em uma experiência inesquecível com som, iluminação e estrutura profissional em São Carlos e região.</p>
+      <div class="hero-buttons">
+        <a href="https://www.instagram.com/tagsomluz/" target="_blank" rel="noopener" class="btn btn-outline">
+          <i class="fab fa-instagram" aria-hidden="true"></i> Instagram
+        </a>
+        <a href="#portfolio" class="btn btn-outline">Conheça Nosso Trabalho</a>
+        <a href="https://www.facebook.com/TAGSomeLuzOficial" target="_blank" rel="noopener" class="btn btn-outline">
+          <i class="fab fa-facebook-f" aria-hidden="true"></i> Facebook
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre Section -->
+  <section class="about" id="sobre">
+    <div class="container">
+      <h2 class="section-title">Sobre a <span>TAG Som e Luz</span></h2>
+      <p class="section-subtitle">Empresa especializada em soluções completas para eventos em São Carlos, com foco em qualidade, inovação e segurança.</p>
+
+      <div class="about-content">
+        <div class="about-text">
+          <p>A <strong>TAG Som e Luz</strong> é uma empresa localizada em São Carlos, São Paulo, especializada em serviços voltados para festas e eventos. Oferecemos soluções completas em animação, organização, decoração e artigos para eventos, atuando como fornecedora de equipamentos e suporte técnico para celebrações sociais e corporativas.</p>
+          <p>Nossa missão é proporcionar experiências únicas através da tecnologia e do profissionalismo. Com equipamentos de última geração e uma equipe altamente capacitada, garantimos que cada evento seja um sucesso absoluto.</p>
+          <p>Atendemos desde eventos particulares, como casamentos e aniversários, até grandes produções institucionais e promocionais. Estamos localizados na Avenida Comendador Alfredo Maffei, uma das principais vias comerciais da cidade, e fazemos parte do circuito de empresas de serviços para festas de São Carlos.</p>
+
+          <div class="about-stats">
+            <div class="stat-item">
+              <div class="stat-number">500+</div>
+              <div class="stat-label">Eventos Realizados</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">10+</div>
+              <div class="stat-label">Anos de Experiência</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">100%</div>
+              <div class="stat-label">Clientes Satisfeitos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-image">
+          <img src="assets/referencia.jpg" alt="Equipe TAG Som e Luz montando estrutura de som e iluminação"
+               width="1280" height="853" loading="lazy" decoding="async">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Serviços Section -->
+  <section class="services" id="servicos">
+    <div class="container">
+      <h2 class="section-title">Nossos <span>Serviços</span></h2>
+      <p class="section-subtitle">Soluções completas em áudio, iluminação, vídeo e estrutura para tornar seu evento inesquecível.</p>
+
+      <div class="services-grid">
+        <article class="service-card" id="som">
+          <div class="service-icon">
+            <i class="fas fa-music" aria-hidden="true"></i>
+          </div>
+          <h3>Som Profissional</h3>
+          <p>Sistemas de áudio de alta potência e fidelidade para DJs, bandas e eventos de todos os portes.</p>
+        </article>
+
+        <article class="service-card" id="iluminacao">
+          <div class="service-icon">
+            <i class="fas fa-lightbulb" aria-hidden="true"></i>
+          </div>
+          <h3>Iluminação Cênica</h3>
+          <p>Moving heads, strobo, washes, controle DMX e efeitos especiais para criar a atmosfera perfeita.</p>
+        </article>
+
+        <article class="service-card" id="led" role="button" tabindex="0" data-open-led aria-haspopup="dialog">
+          <div class="service-icon">
+            <i class="fas fa-tv" aria-hidden="true"></i>
+          </div>
+          <h3>Painel de LED</h3>
+          <p>Telões de LED de alta definição para transmissões, apresentações e experiências visuais imersivas.</p>
+          <span class="service-cta"><i class="fas fa-play" aria-hidden="true"></i> Ver vídeos</span>
+        </article>
+
+        <article class="service-card" id="video">
+          <div class="service-icon">
+            <i class="fas fa-video" aria-hidden="true"></i>
+          </div>
+          <h3>Vídeo &amp; Projeção</h3>
+          <p>Projetores de alta potência e telas para eventos corporativos e sociais.</p>
+        </article>
+
+        <article class="service-card" id="dj">
+          <div class="service-icon">
+            <i class="fas fa-headphones" aria-hidden="true"></i>
+          </div>
+          <h3>Equipamento para DJ</h3>
+          <p>CDJs, mixers, controladores e monitores das melhores marcas.</p>
+        </article>
+
+        <article class="service-card" id="estrutura">
+          <div class="service-icon">
+            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+          </div>
+          <h3>Estrutura (Truss/Grid)</h3>
+          <p>Montagem completa de palco e pista com box truss e grid para iluminação e efeitos.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfólio Section -->
+  <section class="portfolio" id="portfolio">
+    <div class="container">
+      <h2 class="section-title">Nossos <span>Projetos</span></h2>
+      <p class="section-subtitle">Confira alguns dos eventos que já realizamos com excelência e profissionalismo.</p>
+
+      <div class="portfolio-grid">
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/casamento.jpg" alt="Casamento com estrutura de som e iluminação"
+                 width="1280" height="960" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Casamento</h3>
+            <p>Cerimônia e festa com estrutura completa de som e iluminação</p>
+          </figcaption>
+        </figure>
+
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/show.jpg" alt="Show ao ar livre com line array"
+                 width="799" height="533" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Show</h3>
+            <p>Line array e iluminação cênica para show ao ar livre</p>
+          </figcaption>
+        </figure>
+
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/corporativo.jpg" alt="Evento corporativo com painel de LED"
+                 width="1280" height="853" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Evento Corporativo</h3>
+            <p>Convenção com painel de LED e sistema de som ambiente</p>
+          </figcaption>
+        </figure>
+
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/15anos.webp" alt="Festa de 15 anos com iluminação personalizada"
+                 width="1080" height="1350" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Festa de 15 Anos</h3>
+            <p>Iluminação personalizada e som de alta qualidade</p>
+          </figcaption>
+        </figure>
+
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/festival.jpg" alt="Festival com estrutura completa e múltiplos palcos"
+                 width="1320" height="907" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Festival</h3>
+            <p>Estrutura completa para festival com múltiplos palcos</p>
+          </figcaption>
+        </figure>
+
+        <figure class="portfolio-item">
+          <div class="portfolio-image">
+            <img src="assets/formatura.jpg" alt="Formatura com sonorização e iluminação"
+                 width="720" height="1280" loading="lazy" decoding="async">
+          </div>
+          <figcaption class="portfolio-overlay">
+            <h3>Formatura</h3>
+            <p>Sonorização e iluminação para colação de grau e baile</p>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contato Section -->
+  <section class="contact" id="contato">
+    <div class="container">
+      <h2 class="section-title">Entre em <span>Contato</span></h2>
+      <p class="section-subtitle">Clique no botão abaixo e fale diretamente com a gente pelo WhatsApp.</p>
+
+      <div class="contact-actions">
+        <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vi%20seu%20trabalho%20e%20gostaria%20de%20um%20or%C3%A7amento"
+           class="btn btn-whatsapp" target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          Falar pelo WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div>
+        <div class="footer-logo">
+          <img src="assets/logo.png" alt="TAG Som e Luz" width="50" height="50" style="height: 50px; width: auto;">
+          <p>Excelência em som, iluminação e vídeo para eventos em São Carlos e região.</p>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/TAGSomeLuzOficial" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+          <a href="https://www.instagram.com/tagsomluz/" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h4>Links Rápidos</h4>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#sobre">Sobre</a></li>
+          <li><a href="#servicos">Serviços</a></li>
+          <li><a href="#portfolio">Portfólio</a></li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Serviços</h4>
+        <ul>
+          <li><a href="#som">Som Profissional</a></li>
+          <li><a href="#iluminacao">Iluminação Cênica</a></li>
+          <li><a href="#led">Painel de LED</a></li>
+          <li><a href="#video">Vídeo &amp; Projeção</a></li>
+          <li><a href="#dj">Equipamento para DJ</a></li>
+          <li><a href="#estrutura">Estrutura (Truss/Grid)</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Contato</h4>
+        <ul>
+          <li><i class="fab fa-whatsapp" aria-hidden="true"></i>
+            <a href="https://wa.me/5516981719596" target="_blank" rel="noopener">(16) 98171-9596</a></li>
+          <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> São Carlos - SP</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; <span id="year">2026</span> TAG Som e Luz. Todos os direitos reservados. <i class="fas fa-heart" aria-hidden="true" style="color: #6a0dad;"></i></p>
+    </div>
+  </footer>
+
+  <!-- Modal Painel de LED -->
+  <div id="ledModal" class="led-modal" role="dialog" aria-modal="true" aria-labelledby="ledModalTitle" hidden>
+    <div class="led-modal-content">
+      <button class="led-modal-close" type="button" aria-label="Fechar">&times;</button>
+      <h2 class="section-title" id="ledModalTitle">Painel de LED <span>em Ação</span></h2>
+      <p class="section-subtitle">Veja como nossos telões de LED transformam eventos em experiências visuais impressionantes</p>
+
+      <div class="led-videos-grid">
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video1.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video2.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video3.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video4.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video5.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video6.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video7.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video8.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video9.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video10.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video11.mp4"></video></div>
+        <div class="video-card"><video controls playsinline preload="none" data-src="assets/videos/video12.mp4"></video></div>
+      </div>
+
+      <div class="videos-cta">
+        <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Tenho%20interesse%20no%20painel%20de%20LED"
+           class="btn btn-whatsapp" target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp" aria-hidden="true"></i> Quero um orçamento
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
