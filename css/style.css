@@ -878,24 +878,6 @@ footer {
   margin-top: 30px;
 }
 
-/* ========== MARCADOR DE DADO PENDENTE ==========
-   Aparece enquanto um dado (CNPJ, número, CEP) não foi informado.
-   Estilizado de propósito para ninguém publicar sem perceber. */
-.tbd {
-  display: inline-block;
-  background: #FFD54F;
-  color: #3E2C00;
-  border: 1px dashed #B26A00;
-  border-radius: 4px;
-  padding: 1px 7px;
-  font-size: 0.8em;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
 /* ========== SEÇÃO DA FEIRA ========== */
 .fair {
   background: linear-gradient(160deg, #1A1A1A 0%, #2A1140 55%, #1A1A1A 100%);
@@ -1342,9 +1324,5 @@ footer {
   .footer-legal {
     font-size: 0.8rem;
     padding: 16px 12px;
-  }
-
-  .tbd {
-    white-space: normal;
   }
 }

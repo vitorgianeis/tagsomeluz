@@ -207,9 +207,9 @@ assert(posterEls.length === 12, `12 vídeos com poster (achados: ${posterEls.len
 assert(posterEls.every(v => /^assets\/poster\/video\d+\.jpg$/.test(v.getAttribute('poster'))),
   'todos os posters apontam pra assets/poster/');
 
-// --- marcadores de dado pendente ---
+// --- nenhum marcador de dado pendente sobrou (CNPJ, endereço, CEP preenchidos) ---
 const tbds = document.querySelectorAll('.tbd');
-assert(tbds.length === 6, `${tbds.length} marcadores de dado pendente (esperado 6)`);
+assert(tbds.length === 0, `nenhum marcador de dado pendente no HTML (achados: ${tbds.length})`);
 
 // --- resumo ---
 console.log('✔ OK (' + ok.length + ')');

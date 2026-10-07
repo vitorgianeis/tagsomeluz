@@ -63,23 +63,17 @@ Depois abra <http://localhost:8000>.
 > As capas dos vídeos saem dos próprios `.mp4` com ffmpeg:
 > `ffmpeg -ss <segundos> -i assets/video/video1.mp4 -frames:v 1 -vf scale=640:-2 -q:v 4 assets/poster/video1.jpg`
 
-## ⚠ Dados pendentes
+## Dados do cliente
 
-O HTML traz **marcadores amarelos** (`.tbd`) nos campos que dependem do
-cliente. Enquanto estiverem lá, **não publique** — o `validate.js` acusa isso
-na seção `PENDÊNCIAS`.
+Todos os campos que dependiam do cliente já foram preenchidos e conferidos
+no HTML: razão social, CNPJ, número do endereço e CEP (rodapé e seção de
+contato).
 
-Falta informar:
-
-- Razão social
-- CNPJ
-- Número do endereço
-- CEP
-
-Para preencher, procure o texto amarelo em `index.html` e troque
-`<span class="tbd">TEXTO</span>` pelo valor real. Quando não sobrar nenhum
-`.tbd`, remova a regra `.tbd` de `css/style.css` (é opcional — não atrapalha).
-O `npm run test:static` confirma quando zerar.
+Se algum dado voltar a ficar pendente, marque com
+`<span class="tbd">TEXTO</span>` — o `validate.js` avisa na seção
+`PENDÊNCIAS` e o `test:runtime` reprova enquanto houver pendência. Nesse
+caso, crie a regra `.tbd` de novo (fundo amarelo `#FFD54F`, borda tracejada)
+para o marcador ficar visível na página.
 
 ## QR Code
 
@@ -103,13 +97,13 @@ npm test      # roda as quatro checagens
 | Script | O que checa |
 | --- | --- |
 | `npm run test:contrast` | Contraste WCAG AA da página base (30 pares) |
-| `npm run test:contrast:feira` | Contraste da seção da feira e blocos novos (17 pares) |
+| `npm run test:contrast:feira` | Contraste da seção da feira e blocos novos (16 pares) |
 | `npm run test:static` | HTML/CSS/JS sem executar nada (39 checagens) |
 | `npm run test:runtime` | Comportamento real em jsdom (56 checagens) |
 
-O `test:static` imprime uma seção `PENDÊNCIAS` com os `.tbd` ainda em
-aberto. Isso é aviso, não reprova — mas é o sinal de que **ainda não dá para
-publicar**.
+O `test:static` imprime uma seção `PENDÊNCIAS` se aparecer algum marcador
+`.tbd` de dado pendente. Hoje não há nenhum — mas é o sinal de que **não dá
+para publicar** enquanto existir.
 
 `test:runtime` simula o relógio na data da feira para conferir a contagem
 regressiva, então ele continua passando com o tempo.

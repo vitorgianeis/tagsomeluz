@@ -28,7 +28,6 @@ const cases=[
  ['Endereço no Contato #a3a3a3',MUT,DARK,false],
  ['Bloco legal rodapé rgba(.7)',over(WHITE,FOOT,0.7),FOOT,false],
  ['Bloco legal strong branco',WHITE,FOOT,false],
- ['Marcador .tbd #3E2C00 / #FFD54F',hex('#3E2C00'),hex('#FFD54F'),false],
 ];
 
 let fail=0;
