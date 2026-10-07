@@ -105,19 +105,27 @@ assert(broken.length === 0,
   (broken.length ? ' -> faltando: ' + broken.join(', ') : ''));
 
 // --- modal: fecha por padrão e NÃO carrega vídeo ---
-const modal = document.getElementById('ledModal');
+const modal = document.getElementById('serviceModal');
 assert(modal.hasAttribute('hidden'), 'modal começa oculto (hidden)');
 const videos = [...modal.querySelectorAll('video')];
 assert(videos.length === 12, `12 vídeos no modal (achados: ${videos.length})`);
 assert(videos.every(v => !v.getAttribute('src')), 'nenhum vídeo carregado antes de abrir (0 de 39MB baixados)');
+const panels = [...modal.querySelectorAll('.svc-panel')];
+assert(panels.length === 6, `6 painéis de serviço (achados: ${panels.length})`);
+assert(panels.every(p => p.hidden), 'todos os painéis começam ocultos');
+assert(modal.querySelectorAll('.svc-panel img[data-src]').length === 20,
+  `20 fotos na galeria dos painéis (${modal.querySelectorAll('.svc-panel img[data-src]').length})`);
 
 // --- abre pelo link #led (menu e rodapé) ---
 document.querySelector('.footer-links a[href="#led"]')
   .dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 assert(!modal.hasAttribute('hidden') && modal.classList.contains('active'), 'link "Painel de LED" abre o modal');
+assert(!modal.querySelector('.svc-panel[data-panel="led"]').hidden, 'painel do LED fica visível');
+assert(modal.querySelector('.svc-panel[data-panel="som"]').hidden, 'os outros painéis continuam ocultos');
 assert(videos.every(v => v.getAttribute('src')), 'abrir o modal carrega os 12 vídeos');
 assert(document.body.style.overflow === 'hidden', 'rolagem do body travada com o modal aberto');
-assert(document.activeElement === modal.querySelector('.led-modal-close'), 'foco vai para o botão fechar');
+assert(document.activeElement === modal.querySelector('.svc-modal-close'), 'foco vai para o botão fechar');
+assert(modal.getAttribute('aria-labelledby') === 'svc-panel-led-title', 'aria-labelledby aponta pro título do painel aberto');
 
 // --- fecha com Escape ---
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
@@ -126,16 +134,54 @@ assert(videos.every(v => !v.getAttribute('src')), 'fechar libera a memória dos 
 assert(document.body.style.overflow === '', 'rolagem do body destravada');
 
 // --- abre pelo card e fecha pelo X ---
-const ledCard = document.querySelector('[data-open-led]');
+const ledCard = document.querySelector('[data-open-service="led"]');
 ledCard.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 assert(!modal.hasAttribute('hidden'), 'card "Painel de LED" abre o modal');
-modal.querySelector('.led-modal-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+modal.querySelector('.svc-modal-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 assert(modal.hasAttribute('hidden'), 'botão X fecha o modal');
+
+// --- TODOS os cards abrem o modal, cada um com o seu painel ---
+const serviceCards = [...document.querySelectorAll('[data-open-service]')];
+assert(serviceCards.length === 6, `6 cards de serviço clicáveis (achados: ${serviceCards.length})`);
+for (const card of serviceCards) {
+  const key = card.dataset.openService;
+  const panel = modal.querySelector(`.svc-panel[data-panel="${key}"]`);
+  card.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert(!modal.hasAttribute('hidden') && panel && !panel.hidden,
+    `card "${key}" abre o painel ${key}`);
+  assert(modal.querySelectorAll('.svc-panel:not([hidden])').length === 1,
+    `só o painel ${key} fica visível`);
+  assert(modal.getAttribute('aria-labelledby') === `svc-panel-${key}-title`,
+    `aria-labelledby do painel ${key}`);
+  if (key !== 'led') {
+    const media = [...panel.querySelectorAll('[data-src]')];
+    assert(media.length > 0 && media.every(m => m.getAttribute('src')),
+      `painel ${key} carrega a própria galeria (${media.length} itens)`);
+    assert(videos.every(v => !v.getAttribute('src')),
+      `painel ${key} não carrega os vídeos do LED`);
+  }
+  const list = panel.querySelector('.svc-list');
+  assert(list && list.querySelectorAll('li').length >= 4,
+    `painel ${key} lista os tipos de equipamento`);
+  modal.querySelector('.svc-modal-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  const after = [...panel.querySelectorAll('[data-src]')];
+  assert(after.every(m => !m.getAttribute('src')),
+    `fechar libera a mídia do painel ${key}`);
+}
 
 // --- card acessível por teclado ---
 const kd = new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
 ledCard.dispatchEvent(kd);
 assert(!modal.hasAttribute('hidden') && kd.defaultPrevented, 'card abre com Enter (teclado)');
+document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+// --- link de serviço no menu/rodapé abre o modal em vez de rolar ---
+const somLink = document.querySelector('.dropdown a[href="#som"]');
+const scrollCountBefore = scrollCalls.length;
+somLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+assert(!modal.hasAttribute('hidden') && !modal.querySelector('.svc-panel[data-panel="som"]').hidden,
+  'link "#som" do menu abre o painel de som');
+assert(scrollCalls.length === scrollCountBefore, 'link de serviço não rola a página (abre o modal)');
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
 // --- fecha clicando fora ---
@@ -169,7 +215,7 @@ const uses = document.querySelectorAll('use[href^="#i-"]');
 const ids = new Set([...symbols].map(s => s.id));
 const brokenUse = [...new Set([...uses].map(u => u.getAttribute('href').slice(1)))].filter(h => !ids.has(h));
 assert(symbols.length === 16, `16 symbols no sprite (achados: ${symbols.length})`);
-assert(uses.length === 27, `27 usos de ícone (achados: ${uses.length})`);
+assert(uses.length === 37, `37 usos de ícone (achados: ${uses.length})`);
 assert(brokenUse.length === 0, 'nenhum <use> apontando pra symbol inexistente' + (brokenUse.length ? ' -> ' + brokenUse : ''));
 assert(document.querySelectorAll('i[class*="fa-"]').length === 0, 'nenhum <i> do Font Awesome sobrou');
 

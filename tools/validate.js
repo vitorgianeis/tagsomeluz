@@ -153,19 +153,19 @@ else ok.push('seletor do hambúrguer compatível com o HTML');
 if (/\.hamburger span/.test(css) && /class="line1"/.test(html)) ok.push('linhas do hambúrguer ok');
 
 // 18. JS: sem dependência de elementos que não existem
-['navbar','navLinks','hamburger','scrollTop','ledModal','year'].forEach(id => {
+['navbar', 'navLinks', 'hamburger', 'scrollTop', 'serviceModal', 'year'].forEach(id => {
   if (!ids.has(id)) problems.push(`JS espera #${id} que não existe no HTML`);
 });
 ok.push('todos os ids usados pelo JS existem no HTML');
 
 // 19. aria/labels básicos
 if (/aria-modal="true"/.test(html)) ok.push('modal com aria-modal');
-if (/role="button"/.test(html) && /tabindex="0"/.test(html)) ok.push('card do LED acessível por teclado');
+if (/role="button"/.test(html) && /tabindex="0"/.test(html)) ok.push('card de serviço acessível por teclado');
 if (/aria-expanded/.test(html)) ok.push('hambúrguer com aria-expanded');
 if (/skip-link/.test(html)) ok.push('skip link presente');
 
 // 20. contraste: título sobre fundo escuro no modal
-if (/\.led-modal \.section-title[\s\S]{0,120}color:\s*var\(--text-white\)/.test(css)) ok.push('título do modal em branco (legível)');
+if (/\.svc-modal \.svc-title[\s\S]{0,120}color:\s*var\(--text-white\)/.test(css)) ok.push('título do modal em branco (legível)');
 else problems.push('título do modal pode ficar ilegível');
 
 // 21. hero local (sem dependência de terceiros) + preload
@@ -210,6 +210,38 @@ const extImgs = [...html.matchAll(/<img\b[^>]*\b(?:src|srcset)="(https?:\/\/[^"]
   .concat([...css.matchAll(/url\(['"]?(https?:\/\/[^'")]+)/g)].map(m => m[1]));
 if (extImgs.length) problems.push('imagens/URLs externas: ' + extImgs.join(', '));
 else ok.push('nenhuma imagem externa (tudo é servido do próprio repositório)');
+
+// 26. cards de serviço <-> painéis do modal (1:1, com título, lista e CTA)
+const svcKeys = [...new Set([...html.matchAll(/data-open-service="([^"]+)"/g)].map(m => m[1]))];
+const panelKeys = [...new Set([...html.matchAll(/data-panel="([^"]+)"/g)].map(m => m[1]))];
+const cardWithoutPanel = svcKeys.filter(k => !panelKeys.includes(k));
+const panelWithoutCard = panelKeys.filter(k => !svcKeys.includes(k));
+cardWithoutPanel.length || panelWithoutCard.length
+  ? problems.push('card/painel fora de sincronia — sem painel: ' + cardWithoutPanel.join(', ') + ' · sem card: ' + panelWithoutCard.join(', '))
+  : ok.push(`modal de serviços com ${svcKeys.length} painéis, um por card`);
+if (svcKeys.length !== 6) problems.push(`esperava 6 cards de serviço, achei ${svcKeys.length}`);
+const cardsNoRole = [...html.matchAll(/<article class="service-card"[^>]*>/g)]
+  .filter(m => !/role="button"/.test(m[0]) || !/tabindex="0"/.test(m[0]));
+cardsNoRole.length
+  ? problems.push(`${cardsNoRole.length} card(s) de serviço sem role=button/tabindex`)
+  : ok.push('todos os cards de serviço acessíveis por teclado');
+const panelsNoTitle = panelKeys.filter(k => !new RegExp(`id="svc-panel-${k}-title"`).test(html));
+panelsNoTitle.length
+  ? problems.push('painéis sem título nomeável: ' + panelsNoTitle.join(', '))
+  : ok.push('cada painel tem título próprio (aria-labelledby resolve)');
+const panelBlocks = [...html.matchAll(/<section class="svc-panel" data-panel="([^"]+)"[\s\S]*?<\/section>/g)];
+const panelsNoList = panelBlocks.filter(m => !/<ul class="svc-list">/.test(m[0]));
+panelsNoList.length
+  ? problems.push('painéis sem lista de equipamentos: ' + panelsNoList.map(m => m[1]).join(', '))
+  : ok.push('todos os painéis trazem a lista de tipos de equipamento');
+const svcNoCta = panelBlocks.filter(m => !/wa\.me\/5516981719596/.test(m[0])).map(m => m[1]);
+svcNoCta.length
+  ? problems.push('painéis sem CTA de WhatsApp: ' + svcNoCta.join(', '))
+  : ok.push('todos os painéis têm CTA de WhatsApp próprio');
+const svcNoMedia = panelBlocks.filter(m => !/data-src="/.test(m[0])).map(m => m[1]);
+svcNoMedia.length
+  ? problems.push('painéis sem galeria (data-src): ' + svcNoMedia.join(', '))
+  : ok.push('todos os painéis têm galeria de fotos/vídeos');
 
 console.log('✔ OK (' + ok.length + ')');
 ok.forEach(t => console.log('   + ' + t));

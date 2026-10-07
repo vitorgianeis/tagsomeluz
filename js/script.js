@@ -59,71 +59,92 @@
     });
   });
 
-  /* ---------- Modal Painel de LED ---------- */
-  var modal = document.getElementById('ledModal');
+  /* ---------- Modal de Serviços (um painel por card) ---------- */
+  var modal = document.getElementById('serviceModal');
   var lastFocused = null;
+  // ids dos cards que abrem o modal (o rodapé/menu usa os mesmos âncoras)
+  var SERVICE_KEYS = ['som', 'iluminacao', 'led', 'video', 'dj', 'estrutura'];
 
-  function loadVideos() {
-    if (!modal) return;
-    modal.querySelectorAll('video[data-src]').forEach(function (v) {
-      if (!v.getAttribute('src')) {
-        v.src = v.dataset.src;
+  function getPanels() {
+    return modal ? modal.querySelectorAll('.svc-panel') : [];
+  }
+
+  // Só o painel aberto carrega a mídia (img/video usam data-src)
+  function loadMedia(root) {
+    root.querySelectorAll('[data-src]').forEach(function (el) {
+      if (!el.getAttribute('src')) el.src = el.dataset.src;
+    });
+  }
+
+  function unloadMedia(root) {
+    root.querySelectorAll('[data-src]').forEach(function (el) {
+      if (el.tagName === 'VIDEO') {
+        el.pause();
+        el.removeAttribute('src');
+        el.load(); // libera a memória dos 12 vídeos
+      } else {
+        el.removeAttribute('src');
       }
     });
   }
 
-  function unloadVideos() {
+  function openServiceModal(key) {
     if (!modal) return;
-    modal.querySelectorAll('video').forEach(function (v) {
-      v.pause();
-      v.removeAttribute('src');
-      v.load(); // libera a memória dos 12 vídeos
-    });
-  }
+    var target = null;
 
-  function openLEDModal() {
-    if (!modal) return;
+    getPanels().forEach(function (panel) {
+      var isTarget = panel.dataset.panel === key;
+      panel.hidden = !isTarget;
+      if (isTarget) target = panel;
+    });
+    if (!target) return;
+
+    var title = target.querySelector('.svc-title');
+    if (title) modal.setAttribute('aria-labelledby', title.id);
+
     lastFocused = document.activeElement;
-    loadVideos();
+    loadMedia(target);
     modal.hidden = false;
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    var closeBtn = modal.querySelector('.led-modal-close');
+    var closeBtn = modal.querySelector('.svc-modal-close');
     if (closeBtn) closeBtn.focus();
   }
 
-  function closeLEDModal() {
+  function closeServiceModal() {
     if (!modal || modal.hidden) return;
     modal.classList.remove('active');
     modal.hidden = true;
     document.body.style.overflow = '';
-    unloadVideos();
+    getPanels().forEach(unloadMedia);
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
-  // Card de serviço clicável (mouse e teclado)
-  var ledTrigger = document.querySelector('[data-open-led]');
-  if (ledTrigger) {
-    ledTrigger.addEventListener('click', openLEDModal);
-    ledTrigger.addEventListener('keydown', function (e) {
+  // Cards de serviço clicáveis (mouse e teclado)
+  document.querySelectorAll('[data-open-service]').forEach(function (card) {
+    var key = card.dataset.openService;
+    card.addEventListener('click', function () {
+      openServiceModal(key);
+    });
+    card.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openLEDModal();
+        openServiceModal(key);
       }
     });
-  }
+  });
 
   if (modal) {
-    var closeBtn = modal.querySelector('.led-modal-close');
-    if (closeBtn) closeBtn.addEventListener('click', closeLEDModal);
+    var closeBtn = modal.querySelector('.svc-modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeServiceModal);
 
     // Fechar clicando fora do conteúdo
     modal.addEventListener('click', function (e) {
-      if (e.target === modal) closeLEDModal();
+      if (e.target === modal) closeServiceModal();
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !modal.hidden) closeLEDModal();
+      if (e.key === 'Escape' && !modal.hidden) closeServiceModal();
     });
   }
 
@@ -149,14 +170,16 @@
 
     e.preventDefault();
 
-    // "Painel de LED" abre o modal em vez de rolar
-    if (href === '#led') {
+    var id = href.slice(1);
+
+    // Link de serviço (#som, #iluminacao, #led, #video, #dj, #estrutura)
+    // abre o modal do serviço em vez de só rolar até o card
+    if (SERVICE_KEYS.indexOf(id) !== -1) {
       closeMenu();
-      openLEDModal();
+      openServiceModal(id);
       return;
     }
 
-    var id = href.slice(1);
     if (href === '#conteudo') {
       // âncora do link "pular para o conteúdo": foca sem animação
       var el = document.getElementById(id);
@@ -179,8 +202,8 @@
   window.addEventListener('load', function () {
     if (location.hash && location.hash !== '#') {
       var id = location.hash.slice(1);
-      if (id === 'led') {
-        openLEDModal();
+      if (SERVICE_KEYS.indexOf(id) !== -1) {
+        openServiceModal(id);
       } else {
         setTimeout(function () { scrollToId(id); }, 100);
       }

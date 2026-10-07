@@ -249,23 +249,25 @@
       <p class="section-subtitle">Soluções completas em áudio, iluminação, vídeo e estrutura para tornar seu evento inesquecível.</p>
 
       <div class="services-grid">
-        <article class="service-card" id="som">
+        <article class="service-card" id="som" role="button" tabindex="0" data-open-service="som" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-music"></use></svg>
           </div>
           <h3>Som Profissional</h3>
           <p>Sistemas de áudio de alta potência e fidelidade para DJs, bandas e eventos de todos os portes.</p>
+          <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver detalhes</span>
         </article>
 
-        <article class="service-card" id="iluminacao">
+        <article class="service-card" id="iluminacao" role="button" tabindex="0" data-open-service="iluminacao" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-lightbulb"></use></svg>
           </div>
           <h3>Iluminação Cênica</h3>
           <p>Moving heads, strobo, washes, controle DMX e efeitos especiais para criar a atmosfera perfeita.</p>
+          <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver detalhes</span>
         </article>
 
-        <article class="service-card" id="led" role="button" tabindex="0" data-open-led aria-haspopup="dialog">
+        <article class="service-card" id="led" role="button" tabindex="0" data-open-service="led" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-tv"></use></svg>
           </div>
@@ -274,28 +276,31 @@
           <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver vídeos</span>
         </article>
 
-        <article class="service-card" id="video">
+        <article class="service-card" id="video" role="button" tabindex="0" data-open-service="video" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-video"></use></svg>
           </div>
           <h3>Vídeo &amp; Projeção</h3>
           <p>Projetores de alta potência e telas para eventos corporativos e sociais.</p>
+          <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver detalhes</span>
         </article>
 
-        <article class="service-card" id="dj">
+        <article class="service-card" id="dj" role="button" tabindex="0" data-open-service="dj" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-headphones"></use></svg>
           </div>
           <h3>Equipamento para DJ</h3>
           <p>CDJs, mixers, controladores e monitores das melhores marcas.</p>
+          <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver detalhes</span>
         </article>
 
-        <article class="service-card" id="estrutura">
+        <article class="service-card" id="estrutura" role="button" tabindex="0" data-open-service="estrutura" aria-haspopup="dialog">
           <div class="service-icon">
             <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-calendar-check"></use></svg>
           </div>
           <h3>Estrutura (Truss/Grid)</h3>
           <p>Montagem completa de palco e pista com box truss e grid para iluminação e efeitos.</p>
+          <span class="service-cta"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play"></use></svg> Ver detalhes</span>
         </article>
       </div>
     </div>
@@ -459,34 +464,185 @@
     </div>
   </footer>
 
-  <!-- Modal Painel de LED -->
-  <div id="ledModal" class="led-modal" role="dialog" aria-modal="true" aria-labelledby="ledModalTitle" hidden>
-    <div class="led-modal-content">
-      <button class="led-modal-close" type="button" aria-label="Fechar">&times;</button>
-      <h2 class="section-title" id="ledModalTitle">Painel de LED <span>em Ação</span></h2>
-      <p class="section-subtitle">Veja como nossos telões de LED transformam eventos em experiências visuais impressionantes</p>
+  <!-- Modal de Serviços: um painel por card (texto + fotos/vídeos) -->
+  <div id="serviceModal" class="svc-modal" role="dialog" aria-modal="true" aria-labelledby="svc-panel-led-title" hidden>
+    <div class="svc-modal-content">
+      <button class="svc-modal-close" type="button" aria-label="Fechar">&times;</button>
 
-      <div class="led-videos-grid">
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video1.jpg" data-src="assets/video/video1.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video2.jpg" data-src="assets/video/video2.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video3.jpg" data-src="assets/video/video3.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video4.jpg" data-src="assets/video/video4.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video5.jpg" data-src="assets/video/video5.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video6.jpg" data-src="assets/video/video6.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video7.jpg" data-src="assets/video/video7.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video8.jpg" data-src="assets/video/video8.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video9.jpg" data-src="assets/video/video9.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video10.jpg" data-src="assets/video/video10.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video11.jpg" data-src="assets/video/video11.mp4"></video></div>
-        <div class="video-card"><video controls playsinline preload="none" poster="assets/poster/video12.jpg" data-src="assets/video/video12.mp4"></video></div>
-      </div>
+      <!-- Som Profissional -->
+      <section class="svc-panel" data-panel="som" hidden>
+        <h2 class="svc-title" id="svc-panel-som-title">Som Profissional <span>o que levamos</span></h2>
+        <p class="svc-subtitle">Tipos de sistema de som que montamos para o seu evento. Diga o tamanho da festa e o espaço que a gente indica a configuração certa.</p>
 
-      <div class="videos-cta">
-        <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Tenho%20interesse%20no%20painel%20de%20LED"
-           class="btn btn-whatsapp" target="_blank" rel="noopener">
-          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Olá, vim da sua página web, gostaria de um orçamento.
-        </a>
-      </div>
+        <ul class="svc-list">
+          <li>Line array e caixas de passagem (paredão)</li>
+          <li>Caixas de reforço e subwoofers</li>
+          <li>Mesa de som digital e analógica</li>
+          <li>Microfones de voz, lapela e instrumento</li>
+          <li>Monitores de palco (retornos)</li>
+          <li>Processamento, mixagem e efeitos</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><img data-src="assets/img/show.jpg" alt="Line array e iluminação em show ao ar livre" width="799" height="533" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/casamento.jpg" alt="Estrutura de som montada para casamento" width="1280" height="960" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/formatura.jpg" alt="Sonorização de formatura e baile" width="720" height="1280" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/referencia.jpg" alt="Equipe montando sistema de som" width="1280" height="853" loading="lazy" decoding="async"></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20som%20para%20meu%20evento"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Pedir orçamento de som
+          </a>
+        </div>
+      </section>
+
+      <!-- Iluminação Cênica -->
+      <section class="svc-panel" data-panel="iluminacao" hidden>
+        <h2 class="svc-title" id="svc-panel-iluminacao-title">Iluminação Cênica <span>o que levamos</span></h2>
+        <p class="svc-subtitle">Equipamentos de luz para pista, palco e destaque. A gente projeta a montagem conforme o espaço e o clima do evento.</p>
+
+        <ul class="svc-list">
+          <li>Moving heads beam, spot e wash</li>
+          <li>Par 64 e washes LED</li>
+          <li>Strobe e efeitos especiais</li>
+          <li>Mesa de luz e controle DMX</li>
+          <li>Máquina de fumaça e neblina</li>
+          <li>Iluminação de pista, mesas e destaque</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><img data-src="assets/img/festival.jpg" alt="Iluminação de palco em festival" width="1320" height="907" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/15anos.webp" alt="Iluminação personalizada para festa de 15 anos" width="1080" height="1350" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/show.jpg" alt="Iluminação cênica em show ao ar livre" width="799" height="533" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/casamento.jpg" alt="Iluminação de festa de casamento" width="1280" height="960" loading="lazy" decoding="async"></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20ilumina%C3%A7%C3%A3o%20para%20meu%20evento"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Pedir orçamento de iluminação
+          </a>
+        </div>
+      </section>
+
+      <!-- Painel de LED -->
+      <section class="svc-panel" data-panel="led" hidden>
+        <h2 class="svc-title" id="svc-panel-led-title">Painel de LED <span>em Ação</span></h2>
+        <p class="svc-subtitle">Veja como nossos telões de LED transformam eventos em experiências visuais impressionantes</p>
+
+        <ul class="svc-list">
+          <li>Telão de LED para fundo de palco e pista</li>
+          <li>Reprodução de vídeos, fotos e vinhetes</li>
+          <li>Transmissão ao vivo do evento</li>
+          <li>Apresentações e conteúdo de marca</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video1.jpg" data-src="assets/video/video1.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video2.jpg" data-src="assets/video/video2.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video3.jpg" data-src="assets/video/video3.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video4.jpg" data-src="assets/video/video4.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video5.jpg" data-src="assets/video/video5.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video6.jpg" data-src="assets/video/video6.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video7.jpg" data-src="assets/video/video7.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video8.jpg" data-src="assets/video/video8.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video9.jpg" data-src="assets/video/video9.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video10.jpg" data-src="assets/video/video10.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video11.jpg" data-src="assets/video/video11.mp4"></video></div>
+          <div class="svc-card"><video controls playsinline preload="none" poster="assets/poster/video12.jpg" data-src="assets/video/video12.mp4"></video></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Tenho%20interesse%20no%20painel%20de%20LED"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Olá, vim da sua página web, gostaria de um orçamento.
+          </a>
+        </div>
+      </section>
+
+      <!-- Vídeo & Projeção -->
+      <section class="svc-panel" data-panel="video" hidden>
+        <h2 class="svc-title" id="svc-panel-video-title">Vídeo &amp; Projeção <span>o que levamos</span></h2>
+        <p class="svc-subtitle">Imagem para convenções, formaturas e festas: projeção grande, tela boa e sinal estável do início ao fim.</p>
+
+        <ul class="svc-list">
+          <li>Projetores de alta potência</li>
+          <li>Telas de projeção e televisões</li>
+          <li>Reprodução de vídeos e apresentações</li>
+          <li>Cabeamento e conversores de sinal</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><img data-src="assets/img/corporativo.jpg" alt="Painel de LED e projeção em evento corporativo" width="1280" height="853" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/referencia.jpg" alt="Montagem de estrutura de imagem e vídeo" width="1280" height="853" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/formatura.jpg" alt="Projeção para colação de grau" width="720" height="1280" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/casamento.jpg" alt="Vídeo e imagem em festa de casamento" width="1280" height="960" loading="lazy" decoding="async"></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20v%C3%ADdeo%20e%20proje%C3%A7%C3%A3o"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Pedir orçamento de vídeo
+          </a>
+        </div>
+      </section>
+
+      <!-- Equipamento para DJ -->
+      <section class="svc-panel" data-panel="dj" hidden>
+        <h2 class="svc-title" id="svc-panel-dj-title">Equipamento para DJ <span>o que levamos</span></h2>
+        <p class="svc-subtitle">Tudo para a cabine funcionar: toca, mesa, monitores e a estrutura de som junto, tudo do mesmo fornecedor.</p>
+
+        <ul class="svc-list">
+          <li>CDJs e controladores</li>
+          <li>Mesa de DJ (mixer)</li>
+          <li>Monitores de palco e fones</li>
+          <li>Cabeamento, mesas e suportes de cabine</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><img data-src="assets/img/show.jpg" alt="Cabine de DJ em show ao ar livre" width="799" height="533" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/casamento.jpg" alt="DJ tocando em festa de casamento" width="1280" height="960" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/festival.jpg" alt="Estrutura de som e DJ em festival" width="1320" height="907" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/15anos.webp" alt="DJ e iluminação em festa de 15 anos" width="1080" height="1350" loading="lazy" decoding="async"></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20equipamento%20para%20DJ"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Pedir orçamento para DJ
+          </a>
+        </div>
+      </section>
+
+      <!-- Estrutura (Truss/Grid) -->
+      <section class="svc-panel" data-panel="estrutura" hidden>
+        <h2 class="svc-title" id="svc-panel-estrutura-title">Estrutura (Truss/Grid) <span>o que levamos</span></h2>
+        <p class="svc-subtitle">A base de tudo: truss, grid e montagem segura para sustentar som, luz e telão do começo ao fim do evento.</p>
+
+        <ul class="svc-list">
+          <li>Box truss quadrado e circular</li>
+          <li>Grid e pontos de suspensão</li>
+          <li>Montagem de palco e pista</li>
+          <li>Lastros, cabos e fixações</li>
+          <li>Suporte para iluminação e telões</li>
+        </ul>
+
+        <div class="svc-grid">
+          <div class="svc-card"><img data-src="assets/img/festival.jpg" alt="Estrutura completa de truss em festival" width="1320" height="907" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/referencia.jpg" alt="Equipe montando estrutura de palco" width="1280" height="853" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/show.jpg" alt="Grid e iluminação suspensa em show" width="799" height="533" loading="lazy" decoding="async"></div>
+          <div class="svc-card"><img data-src="assets/img/corporativo.jpg" alt="Estrutura montada para evento corporativo" width="1280" height="853" loading="lazy" decoding="async"></div>
+        </div>
+
+        <div class="svc-cta">
+          <a href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20estrutura%20de%20palco"
+             class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-whatsapp"></use></svg> Pedir orçamento de estrutura
+          </a>
+        </div>
+      </section>
     </div>
   </div>
 </body>
