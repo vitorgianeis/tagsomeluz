@@ -2,12 +2,17 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const cssFile = path.join(root, 'css/style.css');
-const jsFile = path.join(root, 'js/script.js');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const css = fs.readFileSync(cssFile, 'utf8');
-const js = fs.readFileSync(jsFile, 'utf8');
-const cssDir = path.dirname(cssFile); // urls do CSS são relativas à pasta css/
+
+// o teste segue o que o <link>/<script> do HTML referenciam: trocar
+// css/site.css por outro nome não quebra a checagem.
+const cssRef = (html.match(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/) || [])[1] || 'css/style.css';
+const jsRef = (html.match(/<script[^>]*src="([^"]+\.js)"[^>]*>/) || [])[1] || 'js/script.js';
+const cssFile = path.join(root, cssRef);
+const jsFile = path.join(root, jsRef);
+const css = fs.existsSync(cssFile) ? fs.readFileSync(cssFile, 'utf8') : '';
+const js = fs.existsSync(jsFile) ? fs.readFileSync(jsFile, 'utf8') : '';
+const cssDir = path.dirname(cssFile); // urls do CSS são relativas à pasta dele
 
 const problems = [];
 const ok = [];
@@ -43,12 +48,15 @@ absPaths.length
   ? problems.push('caminhos absolutos quebram no GH Pages: ' + absPaths.join(', '))
   : ok.push('nenhum caminho absoluto iniciado com "/"');
 
-// 4. <link> do CSS dentro do <head>
+// 4. <link> do CSS dentro do <head> (e arquivo realmente existente)
 const headEnd = html.indexOf('</head>');
-const cssLink = html.indexOf('href="css/style.css"');
-cssLink !== -1 && cssLink < headEnd
-  ? ok.push('<link> do CSS está dentro do <head>')
-  : problems.push('<link> do CSS fora do <head>');
+const head = html.slice(0, headEnd);
+const cssLinks = [...head.matchAll(/<link[^>]*>/g)].map(m => m[0]).filter(t => /rel="stylesheet"/.test(t));
+cssLinks.some(t => t.includes(`href="${cssRef}"`))
+  ? ok.push(`<link> do CSS (${cssRef}) está dentro do <head>`)
+  : problems.push('<link> do CSS fora do <head> (ou ausente)');
+fs.existsSync(cssFile) ? ok.push(`arquivo CSS existe: ${cssRef}`) : problems.push(`CSS referenciado não existe: ${cssRef}`);
+fs.existsSync(jsFile) ? ok.push(`arquivo JS existe: ${jsRef}`) : problems.push(`JS referenciado não existe: ${jsRef}`);
 
 // 5. estrutura básica do documento
 [['<!DOCTYPE html>', 'doctype'], ['</head>', 'fecha head'], ['</body>', 'fecha body'], ['</html>', 'fecha html']]
@@ -57,13 +65,14 @@ cssLink !== -1 && cssLink < headEnd
 if (/<html[^>]*\slang=/.test(html)) ok.push('lang definido'); else problems.push('lang ausente');
 
 // 6. head tem charset + viewport ANTES do title
-const head = html.slice(0, headEnd);
 if (/<meta charset/i.test(head) && /viewport/i.test(head)) ok.push('charset + viewport no <head>');
 else problems.push('charset/viewport ausentes no <head>');
 
 // 7. script com defer e fora do head bloqueante
-if (/<script src="js\/script\.js" defer><\/script>/.test(html)) ok.push('js/script.js com defer');
-else problems.push('js/script.js sem defer');
+const scriptTag = (html.match(/<script[^>]*src="[^"]+\.js"[^>]*><\/script>/) || [])[0] || '';
+/<script[^>]*src="[^"]+"[^>]*\sdefer[^>]*><\/script>/.test(scriptTag)
+  ? ok.push(`${jsRef} com defer`)
+  : problems.push(`${jsRef} sem defer`);
 
 // 8. loader removido (não deve mais existir)
 if (/class="loader"|\.loader\s*\{|getElementById\('loader'\)/.test(html + css + js)) {
@@ -124,7 +133,9 @@ const orphanSym = [...symbols].filter(s => !uses.includes(s));
 if (orphanSym.length) problems.push('symbols sem uso: ' + orphanSym.join(', '));
 
 // 14b. CTA de conversão no hero
-const heroBlock = html.slice(html.indexOf('class="hero"'), html.indexOf('<!-- Sobre'));
+const heroStart = html.indexOf('class="hero"');
+const heroEnd = html.indexOf('</header>', heroStart);
+const heroBlock = heroStart !== -1 && heroEnd !== -1 ? html.slice(heroStart, heroEnd) : '';
 if (/wa\.me\/5516981719596/.test(heroBlock)) ok.push('hero tem CTA de WhatsApp (conversão)');
 else problems.push('hero sem CTA de orçamento');
 if (!/wa\.me\/5516981719596/.test(heroBlock)) problems.push('hero sem link de WhatsApp');
@@ -143,7 +154,10 @@ const htmlClasses = new Set([...html.matchAll(/class="([^"]+)"/g)].flatMap(m => 
 const cssClasses = new Set(
   [...css.matchAll(/(?:^|[\s,>{(])\.([a-zA-Z][\w-]*)/gm)].map(m => m[1])
 );
-const unusedCss = [...cssClasses].filter(c => !htmlClasses.has(c) && !['hidden','active','visible','scrolled','has-dropdown','btn-outline','btn-primary','section-title','section-subtitle','container'].includes(c));
+// classes que só existem como estado (ligadas pelo JS), não no HTML estático
+const STATE_CLASSES = ['hidden','active','visible','scrolled','open','is-past',
+  'has-dropdown','btn-outline','btn-primary','section-title','section-subtitle','container'];
+const unusedCss = [...cssClasses].filter(c => !htmlClasses.has(c) && !STATE_CLASSES.includes(c));
 if (unusedCss.length) problems.push('classes no CSS sem uso: ' + unusedCss.join(', '));
 else ok.push('nenhuma classe órfã no CSS');
 
@@ -153,7 +167,7 @@ else ok.push('seletor do hambúrguer compatível com o HTML');
 if (/\.hamburger span/.test(css) && /class="line1"/.test(html)) ok.push('linhas do hambúrguer ok');
 
 // 18. JS: sem dependência de elementos que não existem
-['navbar', 'navLinks', 'hamburger', 'scrollTop', 'serviceModal', 'year'].forEach(id => {
+['navbar', 'navLinks', 'hamburger', 'scrollTop', 'year'].forEach(id => {
   if (!ids.has(id)) problems.push(`JS espera #${id} que não existe no HTML`);
 });
 ok.push('todos os ids usados pelo JS existem no HTML');
@@ -164,18 +178,25 @@ if (/role="button"/.test(html) && /tabindex="0"/.test(html)) ok.push('card de se
 if (/aria-expanded/.test(html)) ok.push('hambúrguer com aria-expanded');
 if (/skip-link/.test(html)) ok.push('skip link presente');
 
-// 20. contraste: título sobre fundo escuro no modal
-if (/\.svc-modal \.svc-title[\s\S]{0,120}color:\s*var\(--text-white\)/.test(css)) ok.push('título do modal em branco (legível)');
-else problems.push('título do modal pode ficar ilegível');
+// 20. contraste: título de serviço tem que herdar a cor clara (fundo escuro)
+if (/\.svc-btn\s*\{[^}]*color:\s*inherit/.test(css)) ok.push('título do serviço herda a cor clara (legível no fundo escuro)');
+else problems.push('título do serviço pode ficar ilegível (precisa color:inherit no .svc-btn)');
 
 // 21. hero local (sem dependência de terceiros) + preload
 if (/unsplash/i.test(html + css)) problems.push('hero ainda depende do Unsplash');
 else ok.push('hero usa imagem local (sem dependência de terceiros)');
-if (/rel="preload" as="image" href="assets\/img\/hero\.webp"/.test(html)) ok.push('hero com <link rel="preload"> (LCP)');
-else problems.push('hero sem preload');
-const heroBg = (css.match(/url\('([^']*hero[^']*)'\)/) || [])[1];
+const preloadImg = (html.match(/rel="preload" as="image" href="([^"]+)"/) || [])[1];
+if (preloadImg && fs.existsSync(path.join(root, preloadImg))) ok.push(`hero com <link rel="preload"> (LCP): ${preloadImg}`);
+else problems.push('hero sem preload de imagem válido');
+const heroBg = (css.match(/\.slide-1\{[^}]*url\('([^']+)'\)/) || css.match(/url\('([^']*hero[^']*)'\)/) || [])[1];
 if (heroBg && fs.existsSync(path.resolve(cssDir, heroBg))) ok.push(`background do hero aponta pra ${heroBg} (existe)`);
 else problems.push('background do hero não resolve pra arquivo existente');
+// o preload precisa ser a MESMA foto que abre o slider (senão o LCP não adianta)
+if (preloadImg && heroBg && path.resolve(root, preloadImg) === path.resolve(cssDir, heroBg)) {
+  ok.push('preload = primeira foto do slider (LCP otimizado de verdade)');
+} else if (preloadImg && heroBg) {
+  problems.push(`preload (${preloadImg}) é diferente da 1ª foto do slider (${heroBg})`);
+}
 
 // 22. posters dos vídeos
 const posters = [...html.matchAll(/poster="([^"]+)"/g)].map(m => m[1]);
@@ -211,43 +232,64 @@ const extImgs = [...html.matchAll(/<img\b[^>]*\b(?:src|srcset)="(https?:\/\/[^"]
 if (extImgs.length) problems.push('imagens/URLs externas: ' + extImgs.join(', '));
 else ok.push('nenhuma imagem externa (tudo é servido do próprio repositório)');
 
-// 26. cards de serviço <-> painéis do modal (1:1, com título, lista e galeria)
-const svcKeys = [...new Set([...html.matchAll(/data-open-service="([^"]+)"/g)].map(m => m[1]))];
-const panelKeys = [...new Set([...html.matchAll(/data-panel="([^"]+)"/g)].map(m => m[1]))];
-const cardWithoutPanel = svcKeys.filter(k => !panelKeys.includes(k));
-const panelWithoutCard = panelKeys.filter(k => !svcKeys.includes(k));
-cardWithoutPanel.length || panelWithoutCard.length
-  ? problems.push('card/painel fora de sincronia — sem painel: ' + cardWithoutPanel.join(', ') + ' · sem card: ' + panelWithoutCard.join(', '))
-  : ok.push(`modal de serviços com ${svcKeys.length} painéis, um por card`);
-if (svcKeys.length !== 6) problems.push(`esperava 6 cards de serviço, achei ${svcKeys.length}`);
-const cardsNoRole = [...html.matchAll(/<article class="service-card"[^>]*>/g)]
-  .filter(m => !/role="button"/.test(m[0]) || !/tabindex="0"/.test(m[0]));
-cardsNoRole.length
-  ? problems.push(`${cardsNoRole.length} card(s) de serviço sem role=button/tabindex`)
-  : ok.push('todos os cards de serviço acessíveis por teclado');
-const panelsNoTitle = panelKeys.filter(k => !new RegExp(`id="svc-panel-${k}-title"`).test(html));
-panelsNoTitle.length
-  ? problems.push('painéis sem título nomeável: ' + panelsNoTitle.join(', '))
-  : ok.push('cada painel tem título próprio (aria-labelledby resolve)');
-const panelBlocks = [...html.matchAll(/<section class="svc-panel" data-panel="([^"]+)"[\s\S]*?<\/section>/g)];
-const panelsNoList = panelBlocks.filter(m => !/<ul class="svc-list">/.test(m[0]));
-panelsNoList.length
-  ? problems.push('painéis sem lista de equipamentos: ' + panelsNoList.map(m => m[1]).join(', '))
+// 26. serviços: 6 linhas que abrem, cada uma com botão acessível,
+//     painel nomeado, lista de equipamentos e galeria de fotos/vídeos
+// corta no próximo </section>: senão o 6º serviço "herda" o resto da página
+const svcChunks = html.split(/<div class="svc-item"/).slice(1)
+  .map(c => c.split('</section>')[0]);
+const svcParts = svcChunks.map(c => ({
+  key: (c.match(/\sid="([^"]+)"/) || [])[1] || '(sem id)',
+  html: c
+}));
+if (svcParts.length !== 6) problems.push(`esperava 6 serviços, achei ${svcParts.length}`);
+else ok.push(`6 serviços em acordeão: ${svcParts.map(p => p.key).join(', ')}`);
+
+const btnOf = c => (c.match(/<div class="svc-btn"[^>]*>/) || [])[0] || '';
+const btnsNoRole = svcParts.filter(p => {
+  const b = btnOf(p.html);
+  return !/role="button"/.test(b) || !/tabindex="0"/.test(b);
+});
+btnsNoRole.length
+  ? problems.push('serviço(s) sem role=button/tabindex: ' + btnsNoRole.map(p => p.key).join(', '))
+  : ok.push('todos os serviços abrem por teclado (role=button + tabindex)');
+
+const ctlNoTarget = svcParts.filter(p => {
+  const id = (btnOf(p.html).match(/aria-controls="([^"]+)"/) || [])[1];
+  return !id || !ids.has(id);
+});
+ctlNoTarget.length
+  ? problems.push('aria-controls sem painel alvo: ' + ctlNoTarget.map(p => p.key).join(', '))
+  : ok.push('todo botão de serviço aponta pra um painel existente (aria-controls)');
+
+const panelNoTitle = svcParts.filter(p => !/class="svc-painel"/.test(p.html) || !/<h3>/.test(p.html));
+panelNoTitle.length
+  ? problems.push('painéis sem título próprio: ' + panelNoTitle.map(p => p.key).join(', '))
+  : ok.push('cada painel tem título (h3) próprio');
+
+const panelNoList = svcParts.filter(p => !/<ul class="lista">/.test(p.html) || (p.html.match(/<li>/g) || []).length < 2);
+panelNoList.length
+  ? problems.push('painéis sem lista de equipamentos: ' + panelNoList.map(p => p.key).join(', '))
   : ok.push('todos os painéis trazem a lista de tipos de equipamento');
+
+const panelNoGallery = svcParts.filter(p => !/class="svc-fotos"/.test(p.html) || !/<img\b|<video\b/.test(p.html));
+panelNoGallery.length
+  ? problems.push('painéis sem galeria de fotos/vídeos: ' + panelNoGallery.map(p => p.key).join(', '))
+  : ok.push('todos os painéis têm galeria de fotos/vídeos');
+
 // 26b. CTA nos painéis é opcional (a conversão principal fica no hero);
 //      se um painel tiver, tem que apontar pro WhatsApp certo.
-const panelCta = panelBlocks.filter(m => /wa\.me\//.test(m[0])).map(m => m[1]);
-const panelBadCta = panelBlocks
-  .filter(m => /wa\.me\//.test(m[0]) && !/wa\.me\/5516981719596/.test(m[0]))
-  .map(m => m[1]);
+const panelCta = svcParts.filter(p => /wa\.me\//.test(p.html));
+const panelBadCta = svcParts.filter(p => /wa\.me\//.test(p.html) && !/wa\.me\/5516981719596/.test(p.html));
 panelBadCta.length
-  ? problems.push('painéis com link de WhatsApp errado: ' + panelBadCta.join(', '))
+  ? problems.push('painéis com link de WhatsApp errado: ' + panelBadCta.map(p => p.key).join(', '))
   : ok.push('CTA de conversão no hero' +
-      (panelCta.length ? ' e em ' + panelCta.length + ' painel(is): ' + panelCta.join(', ') : ' (painéis sem CTA)'));
-const svcNoMedia = panelBlocks.filter(m => !/data-src="/.test(m[0])).map(m => m[1]);
-svcNoMedia.length
-  ? problems.push('painéis sem galeria (data-src): ' + svcNoMedia.join(', '))
-  : ok.push('todos os painéis têm galeria de fotos/vídeos');
+      (panelCta.length ? ' e em ' + panelCta.length + ' painel(is): ' + panelCta.map(p => p.key).join(', ') : ' (painéis sem CTA)'));
+
+// vídeo só pode existir dentro de um painel e sempre com data-src
+const videosForaDePainel = vids.filter(t => !svcParts.some(p => p.html.includes(t)));
+videosForaDePainel.length
+  ? problems.push(`${videosForaDePainel.length} vídeo(s) fora de painel de serviço`)
+  : ok.push('todos os vídeos estão dentro dos painéis de serviço');
 
 // 27. a proporção declarada em <img width height> bate com o arquivo real.
 //     Tamanho errado = placeholder com altura trocada (layout salto) e foto

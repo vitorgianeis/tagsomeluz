@@ -1,21 +1,33 @@
+/* ============================================================
+   runtimetest.js — checagens de comportamento do site ATUAL.
+   Carrega index.html no jsdom, executa o <script> referenciado
+   pelo HTML e verifica o que ele precisa fazer de verdade.
+   ============================================================ */
 const fs = require('fs');
-const { JSDOM } = require('jsdom');
-
 const path = require('path');
+const { JSDOM, VirtualConsole } = require('jsdom');
+
 const root = path.join(__dirname, '..');
-const html = fs.readFileSync(`${root}/index.html`, 'utf8');
-const js = fs.readFileSync(`${root}/js/script.js`, 'utf8');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const jsRef = (html.match(/<script[^>]*src="([^"]+\.js)"[^>]*>/) || [])[1] || 'js/script.js';
+const js = fs.readFileSync(path.join(root, jsRef), 'utf8');
 
 const problems = [];
 const ok = [];
 const assert = (cond, msg) => (cond ? ok.push(msg) : problems.push(msg));
 
-// virtualConsole para capturar erros não capturados
-const { VirtualConsole } = require('jsdom');
+/* virtualConsole: erros de JS não tratados.
+   O jsdom não implementa pause()/load() de <video> e avisa por jsdomError —
+   é lacuna da ferramenta, não bug do site: filtramos só isso. */
 const vc = new VirtualConsole();
 const jsErrors = [];
-vc.on('jsdomError', e => jsErrors.push(e.message));
+const isMediaGap = m => /Not implemented: HTMLMediaElement/.test(m);
+vc.on('jsdomError', e => { if (!isMediaGap(e.message)) jsErrors.push(e.message); });
 vc.on('error', (...a) => jsErrors.push(a.join(' ')));
+
+const DEADLINE = '2026-11-29T09:00:00-03:00';
+// relógio congelado 2 dias, 5h, 30min e 15s antes da feira
+const FAKE_NOW = Date.parse('2026-11-27T03:29:45-03:00');
 
 const dom = new JSDOM(html, {
   runScripts: 'outside-only',
@@ -27,249 +39,227 @@ const dom = new JSDOM(html, {
 const { window } = dom;
 const { document } = window;
 
-// jsdom não implementa scrollTo — registramos as chamadas
+/* jsdom não rola a página: registramos as chamadas de scrollTo */
 const scrollCalls = [];
 window.scrollTo = (opts) => { scrollCalls.push(opts); };
 window.scrollY = 0;
 
-// jsdom não faz layout: simulamos posições para testar o offset de rolagem
+/* jsdom não faz layout: damos posições fixas por id
+   (navbar fixa = 70px; as seções começam em 0/800/1600) */
+const ID_TOP = { home: 0, sobre: 800, servicos: 1600 };
+Object.defineProperty(window.HTMLElement.prototype, 'offsetTop', {
+  get() { return Object.prototype.hasOwnProperty.call(ID_TOP, this.id) ? ID_TOP[this.id] : 0; },
+  configurable: true
+});
 Object.defineProperty(window.HTMLElement.prototype, 'offsetHeight', {
   get() { return this.id === 'navbar' ? 70 : 500; },
   configurable: true
 });
-Object.defineProperty(window.HTMLElement.prototype, 'offsetTop', {
-  get() { return { home: 0, sobre: 800, servicos: 1600 }[this.id] || 0; },
-  configurable: true
-});
 window.HTMLElement.prototype.getBoundingClientRect = function () {
-  const top = { home: 0, sobre: 800, servicos: 1600, som: 1700 }[this.id] || 0;
-  return { top, bottom: top + 400, left: 0, right: 800, width: 800, height: 400, x: 0, y: top };
+  const top = Object.prototype.hasOwnProperty.call(ID_TOP, this.id) ? ID_TOP[this.id] : 0;
+  return { top, bottom: top + 500, left: 0, right: 1200, width: 1200, height: 500, x: 0, y: top };
 };
 
-// Relógio mockado ANTES de rodar o script: o tick() do countdown
-// executa na avaliação e não pode ser reexecutado depois.
-// O window.eval roda no realm do jsdom, então o mock tem que valer para
-// window.Date.now — não basta trocar o Date.now do Node.
-const DEADLINE = Date.parse('2026-11-29T09:00:00-03:00');
-const OFFSET = ((2 * 24 + 5) * 3600 + 30 * 60 + 15) * 1000; // 2d 5h 30m 15s
-const REAL_NOW = Date.now();   // instante real, capturado como número
-const nodeNow = Date.now;      // função original, para restaurar
-const winNow = window.Date.now;
+/* relógio congelado enquanto o script roda (contagem regressiva) */
+window.Date.now = () => FAKE_NOW;
 
-// Roda o script real
 try {
-  window.Date.now = () => DEADLINE - OFFSET;
-  Date.now = () => DEADLINE - OFFSET;
   window.eval(js);
-  assert(jsErrors.length === 0, 'script.js roda sem erro' + (jsErrors.length ? ' -> ' + jsErrors.join(' | ') : ''));
+  assert(true, `${jsRef} executou sem estourar`);
 } catch (e) {
-  problems.push('script.js lançou exceção: ' + e.message);
+  problems.push(`${jsRef} lançou exceção: ${e.message}`);
 }
-window.Date.now = winNow; // devolve o relógio real o quanto antes
-Date.now = nodeNow;
+window.Date.now = Date.now;
 
-// --- ano dinâmico ---
-const year = document.getElementById('year');
-assert(year && year.textContent === String(new Date().getFullYear()),
-  `ano do rodapé dinâmico (${year && year.textContent})`);
+/* ---------- 1. sem JS quebrado ---------- */
+assert(jsErrors.length === 0, 'nenhum erro de JS durante a carga' + (jsErrors.length ? ' → ' + jsErrors.join(' | ') : ''));
 
-// --- menu mobile ---
+/* ---------- 2. ano do rodapé ---------- */
+assert(document.getElementById('year').textContent === String(new Date().getFullYear()), 'ano do rodapé atualizado');
+
+/* ---------- 3. menu mobile ---------- */
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
-hamburger.dispatchEvent(new window.Event('click', { bubbles: true }));
-assert(navLinks.classList.contains('active'), 'hambúrguer abre o menu');
-assert(hamburger.getAttribute('aria-expanded') === 'true', 'hambúrguer atualiza aria-expanded');
-hamburger.dispatchEvent(new window.Event('click', { bubbles: true }));
-assert(!navLinks.classList.contains('active'), 'hambúrguer fecha o menu');
-assert(hamburger.getAttribute('aria-expanded') === 'false', 'aria-expanded volta para false');
+hamburger.click();
+assert(navLinks.classList.contains('active'), 'menu abre (classe .active)');
+assert(hamburger.getAttribute('aria-expanded') === 'true', 'hambúrguer com aria-expanded=true ao abrir');
+assert(document.body.style.overflow === 'hidden', 'rolagem do fundo travada com menu aberto');
 
-// --- clique em link fecha o menu ---
-hamburger.dispatchEvent(new window.Event('click', { bubbles: true }));
-const sobreLink = document.querySelector('.nav-links a[href="#sobre"]');
-sobreLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-assert(!navLinks.classList.contains('active'), 'clicar num link fecha o menu mobile');
+navLinks.querySelector('.fechar').click();
+assert(!navLinks.classList.contains('active'), 'menu fecha pelo X');
+assert(hamburger.getAttribute('aria-expanded') === 'false', 'aria-expanded volta pra false');
+assert(document.body.style.overflow === '', 'rolagem liberada ao fechar');
 
-// --- âncora rola com offset da navbar (não pode ficar atrás da barra fixa) ---
-const last = scrollCalls[scrollCalls.length - 1];
-assert(last && last.top === 800 - 70 - 20,
-  `rolagem respeita a navbar fixa (top=${last && last.top}, esperado 710)`);
-assert(last && last.behavior === 'smooth', 'rolagem suave');
-
-// --- TODOS os links do menu/rodapé levam a um destino real ---
-const anchors = [...document.querySelectorAll('a[href^="#"]')]
-  .map(a => a.getAttribute('href'))
-  .filter(h => h !== '#');
-const broken = [...new Set(anchors)].filter(h => !document.getElementById(h.slice(1)));
-assert(broken.length === 0,
-  `nenhum link interno quebrado (testados ${new Set(anchors).size})` +
-  (broken.length ? ' -> faltando: ' + broken.join(', ') : ''));
-
-// --- modal: fecha por padrão e NÃO carrega vídeo ---
-const modal = document.getElementById('serviceModal');
-assert(modal.hasAttribute('hidden'), 'modal começa oculto (hidden)');
-const videos = [...modal.querySelectorAll('video')];
-assert(videos.length === 12, `12 vídeos no modal (achados: ${videos.length})`);
-assert(videos.every(v => !v.getAttribute('src')), 'nenhum vídeo carregado antes de abrir (0 de 39MB baixados)');
-const panels = [...modal.querySelectorAll('.svc-panel')];
-assert(panels.length === 6, `6 painéis de serviço (achados: ${panels.length})`);
-assert(panels.every(p => p.hidden), 'todos os painéis começam ocultos');
-// contagem flexível: o conteúdo dos painéis muda (fotos entram/saem),
-// o que importa é toda galeria existir e nenhum item quebrado
-const galleryImgs = [...modal.querySelectorAll('.svc-panel img[data-src]')];
-assert(galleryImgs.length >= 10,
-  `galeria de fotos nos painéis (achados: ${galleryImgs.length})`);
-assert(panels.every(p => p.querySelectorAll('[data-src]').length > 0),
-  'todo painel tem a própria galeria (foto ou vídeo)');
-
-// --- abre pelo link #led (menu e rodapé) ---
-document.querySelector('.footer-links a[href="#led"]')
-  .dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-assert(!modal.hasAttribute('hidden') && modal.classList.contains('active'), 'link "Painel de LED" abre o modal');
-assert(!modal.querySelector('.svc-panel[data-panel="led"]').hidden, 'painel do LED fica visível');
-assert(modal.querySelector('.svc-panel[data-panel="som"]').hidden, 'os outros painéis continuam ocultos');
-assert(videos.every(v => v.getAttribute('src')), 'abrir o modal carrega os 12 vídeos');
-assert(document.body.style.overflow === 'hidden', 'rolagem do body travada com o modal aberto');
-assert(document.activeElement === modal.querySelector('.svc-modal-close'), 'foco vai para o botão fechar');
-assert(modal.getAttribute('aria-labelledby') === 'svc-panel-led-title', 'aria-labelledby aponta pro título do painel aberto');
-
-// --- fecha com Escape ---
+hamburger.click();
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-assert(modal.hasAttribute('hidden'), 'Escape fecha o modal');
-assert(videos.every(v => !v.getAttribute('src')), 'fechar libera a memória dos vídeos');
-assert(document.body.style.overflow === '', 'rolagem do body destravada');
+assert(!navLinks.classList.contains('active'), 'menu fecha com Esc');
 
-// --- abre pelo card e fecha pelo X ---
-const ledCard = document.querySelector('[data-open-service="led"]');
-ledCard.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-assert(!modal.hasAttribute('hidden'), 'card "Painel de LED" abre o modal');
-modal.querySelector('.svc-modal-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-assert(modal.hasAttribute('hidden'), 'botão X fecha o modal');
+/* ---------- 4. rolagem suave com desconto da navbar fixa ---------- */
+scrollCalls.length = 0;
+const navSobre = document.querySelector('.nav-links a[href="#sobre"]');
+navSobre.click();
+assert(scrollCalls.length === 1, 'clicar em "Sobre" rola a página');
+assert(scrollCalls[0] && scrollCalls[0].top === 800 - 70 - 20, `topo da rolagem desconta a navbar (${scrollCalls[0] && scrollCalls[0].top}, esperado 710)`);
+assert(scrollCalls[0] && scrollCalls[0].behavior === 'smooth', 'rolagem com behavior=smooth');
 
-// --- TODOS os cards abrem o modal, cada um com o seu painel ---
-const serviceCards = [...document.querySelectorAll('[data-open-service]')];
-assert(serviceCards.length === 6, `6 cards de serviço clicáveis (achados: ${serviceCards.length})`);
-for (const card of serviceCards) {
-  const key = card.dataset.openService;
-  const panel = modal.querySelector(`.svc-panel[data-panel="${key}"]`);
-  card.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-  assert(!modal.hasAttribute('hidden') && panel && !panel.hidden,
-    `card "${key}" abre o painel ${key}`);
-  assert(modal.querySelectorAll('.svc-panel:not([hidden])').length === 1,
-    `só o painel ${key} fica visível`);
-  assert(modal.getAttribute('aria-labelledby') === `svc-panel-${key}-title`,
-    `aria-labelledby do painel ${key}`);
-  if (key !== 'led') {
-    const media = [...panel.querySelectorAll('[data-src]')];
-    assert(media.length > 0 && media.every(m => m.getAttribute('src')),
-      `painel ${key} carrega a própria galeria (${media.length} itens)`);
-    assert(videos.every(v => !v.getAttribute('src')),
-      `painel ${key} não carrega os vídeos do LED`);
+/* link do rodapé também rola */
+scrollCalls.length = 0;
+const footFeira = document.querySelector('.footer-links a[href="#feira"]');
+assert(!!footFeira, 'rodapé tem link pra #feira');
+footFeira.click();
+assert(scrollCalls.length === 1, 'link do rodapé também rola a página');
+
+/* ---------- 5. nenhum link interno quebrado ---------- */
+const anchors = [...document.querySelectorAll('a[href^="#"]')].map(a => a.getAttribute('href'));
+const broken = anchors.filter(h => h !== '#' && !document.getElementById(h.slice(1)));
+assert(broken.length === 0, `todas as ${anchors.length} âncoras internas resolvem no DOM`);
+
+/* ---------- 6. serviços: abrem, fecham e são acessíveis ---------- */
+const items = [...document.querySelectorAll('.svc-item')];
+const btns = [...document.querySelectorAll('.svc-btn')];
+assert(items.length === 6, `6 serviços na página (${items.length})`);
+assert(btns.length === 6, 'um botão por serviço');
+assert(btns.every(b => b.getAttribute('role') === 'button' && b.getAttribute('tabindex') === '0'),
+  'todo serviço acessível por teclado (role=button + tabindex)');
+assert(btns.every(b => {
+  const alvo = b.getAttribute('aria-controls');
+  return alvo && document.getElementById(alvo);
+}), 'aria-controls resolve pra painel existente');
+assert(btns.every(b => b.getAttribute('aria-expanded') === 'false'), 'todos os serviços começam fechados');
+
+/* clique abre só aquele */
+const btnSom = document.getElementById('som').querySelector('.svc-btn');
+btnSom.click();
+assert(document.getElementById('som').classList.contains('open'), 'clique abre o serviço');
+assert(btnSom.getAttribute('aria-expanded') === 'true', 'aria-expanded=true com aberto');
+assert(!document.getElementById('iluminacao').classList.contains('open'), 'abrir um não abre os outros');
+
+/* Enter alterna (teclado) */
+const btnIlum = document.getElementById('iluminacao').querySelector('.svc-btn');
+btnIlum.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+assert(document.getElementById('iluminacao').classList.contains('open'), 'Enter abre o serviço');
+btnIlum.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+assert(!document.getElementById('iluminacao').classList.contains('open'), 'Enter fecha de novo');
+
+/* conteúdo dos painéis */
+let comLista = 0, comGaleria = 0, comTitulo = 0, comCta = 0, ctaErrado = 0;
+items.forEach(it => {
+  const p = it.querySelector('.svc-painel');
+  if (!p) return;
+  if (it.querySelector('h3')) comTitulo++;
+  const lis = p.querySelectorAll('ul.lista li');
+  if (lis.length >= 2) comLista++;
+  if (p.querySelector('.svc-fotos img, .svc-fotos video')) comGaleria++;
+  const zap = p.querySelector('a[href*="wa.me/"]');
+  if (zap) {
+    comCta++;
+    if (!/wa\.me\/5516981719596/.test(zap.getAttribute('href'))) ctaErrado++;
   }
-  const list = panel.querySelector('.svc-list');
-  assert(list && list.querySelectorAll('li').length >= 2,
-    `painel ${key} lista os tipos de equipamento`);
-  modal.querySelector('.svc-modal-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-  const after = [...panel.querySelectorAll('[data-src]')];
-  assert(after.every(m => !m.getAttribute('src')),
-    `fechar libera a mídia do painel ${key}`);
-}
+});
+assert(comTitulo === 6, 'todo painel tem título próprio');
+assert(comLista === 6, 'todo painel lista os equipamentos');
+assert(comGaleria === 6, 'todo painel tem galeria de fotos/vídeos');
+assert(ctaErrado === 0, `CTA de painel (quando existe) aponta pro WhatsApp certo — ${comCta} painel(es)`);
+assert(/wa\.me\/5516981719596/.test(document.querySelector('.hero-ctas .btn').getAttribute('href')),
+  'primeiro botão do hero é o WhatsApp da TAG');
 
-// --- card acessível por teclado ---
-const kd = new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-ledCard.dispatchEvent(kd);
-assert(!modal.hasAttribute('hidden') && kd.defaultPrevented, 'card abre com Enter (teclado)');
-document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+/* link de serviço no rodapé: abre o painel (não só rola) */
+scrollCalls.length = 0;
+const linkDj = document.querySelector('.footer-links a[href="#dj"]');
+assert(!!linkDj, 'rodapé tem link direto pro serviço #dj');
+linkDj.click();
+assert(document.getElementById('dj').classList.contains('open'), 'link de serviço abre o painel dele');
+assert(scrollCalls.length === 1, 'e também rola até o serviço');
 
-// --- link de serviço no menu/rodapé abre o modal em vez de rolar ---
-const somLink = document.querySelector('.dropdown a[href="#som"]');
-const scrollCountBefore = scrollCalls.length;
-somLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-assert(!modal.hasAttribute('hidden') && !modal.querySelector('.svc-panel[data-panel="som"]').hidden,
-  'link "#som" do menu abre o painel de som');
-assert(scrollCalls.length === scrollCountBefore, 'link de serviço não rola a página (abre o modal)');
-document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+/* ---------- 7. painel de LED: 12 vídeos carregam ao abrir, liberam ao fechar ---------- */
+const ledPanel = document.getElementById('p-led');
+const videos = [...ledPanel.querySelectorAll('video')];
+assert(videos.length === 12, `painel de LED com 12 vídeos (${videos.length})`);
+assert(videos.every(v => !v.getAttribute('src')), 'nenhum vídeo baixado antes de abrir');
+assert(videos.every(v => v.getAttribute('preload') === 'none'), 'todo vídeo com preload=none');
+assert(videos.every(v => (v.getAttribute('poster') || '').startsWith('assets/poster/')),
+  'todo vídeo com poster local');
 
-// --- fecha clicando fora ---
-ledCard.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-modal.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-assert(modal.hasAttribute('hidden'), 'clique fora do conteúdo fecha o modal');
+const btnLed = document.getElementById('led').querySelector('.svc-btn');
+btnLed.click();
+assert(videos.every(v => v.getAttribute('src') === v.dataset.src), 'abrir o LED carrega os 12 vídeos (data-src → src)');
+btnLed.click();
+assert(videos.every(v => !v.getAttribute('src')), 'fechar o LED descarrega os vídeos (memória liberada)');
 
-// --- botão voltar ao topo ---
+/* vídeos nunca ficam soltos na página */
+const soltos = [...document.querySelectorAll('video')].filter(v => !v.closest('.svc-painel'));
+assert(soltos.length === 0, 'nenhum <video> fora de painel');
+
+/* ---------- 8. navbar com fundo + voltar ao topo ---------- */
+const navbar = document.getElementById('navbar');
 const st = document.getElementById('scrollTop');
-window.scrollY = 600;
+assert(!navbar.classList.contains('scrolled'), 'navbar começa transparente');
+window.scrollY = 600;   // abaixo de 500px o botão topo não aparece
 window.dispatchEvent(new window.Event('scroll'));
-assert(st.classList.contains('visible'), 'botão "voltar ao topo" aparece após rolar');
-st.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-assert(scrollCalls.some(c => c.top === 0), 'botão "voltar ao topo" rola para o topo');
+assert(navbar.classList.contains('scrolled'), 'navbar ganha fundo ao rolar');
+assert(st.classList.contains('visible'), 'botão voltar ao topo aparece depois de rolar');
+scrollCalls.length = 0;
+st.click();
+assert(scrollCalls.length === 1 && scrollCalls[0].top === 0, 'voltar ao topo rola pro início');
 
-// --- navbar ganha fundo ao rolar ---
+window.scrollY = 0;
 window.dispatchEvent(new window.Event('scroll'));
-assert(document.getElementById('navbar').classList.contains('scrolled'), 'navbar ganha fundo ao rolar');
+assert(!navbar.classList.contains('scrolled'), 'navbar volta a ficar transparente no topo');
+assert(!st.classList.contains('visible'), 'botão topo some no topo da página');
 
-// --- CTA de conversão no hero ---
-const heroBtns = [...document.querySelectorAll('.hero-buttons a')];
-assert(heroBtns.length === 4, `hero com 4 botões (achados: ${heroBtns.length})`);
-assert(heroBtns[0].getAttribute('href').startsWith('https://wa.me/'),
-  `CTA do orçamento é o 1º botão (${heroBtns[0].getAttribute('href').slice(0, 30)}…)`);
-assert(/orçamento/i.test(heroBtns[0].textContent), 'CTA diz "Peça seu orçamento"');
-assert(heroBtns[0].rel === 'noopener' && heroBtns[0].target === '_blank', 'CTA com rel=noopener');
+/* ---------- 9. seção da feira ---------- */
+const feira = document.getElementById('feira');
+assert(!!feira, 'seção #feira existe');
+const feiraTxt = feira.textContent;
+['Feira Celebrar e Casar', '29 de novembro de 2026', '9h às 21h', 'A Casa Garcia', 'Gratuita']
+  .forEach(t => assert(feiraTxt.includes(t), `feira traz "${t}"`));
 
-// --- sprite de ícones ---
-const symbols = document.querySelectorAll('symbol[id^="i-"]');
-const uses = document.querySelectorAll('use[href^="#i-"]');
-const ids = new Set([...symbols].map(s => s.id));
-const brokenUse = [...new Set([...uses].map(u => u.getAttribute('href').slice(1)))].filter(h => !ids.has(h));
-assert(symbols.length === 16, `16 symbols no sprite (achados: ${symbols.length})`);
-// sem número fixo de usos: o conteúdo muda (CTA entra/sai) — o que importa é não quebrar
-assert(uses.length > 0, `sprite em uso (${uses.length} usos de ícone)`);
-assert(document.querySelectorAll('.service-cta .icon').length === 6,
-  `6 CTAs "Ver detalhes" no grid de serviços (achados: ${document.querySelectorAll('.service-cta .icon').length})`);
-assert(document.querySelector('.hero a[href^="https://wa.me/"] .icon'),
-  'CTA do hero usa o ícone do WhatsApp');
-assert(brokenUse.length === 0, 'nenhum <use> apontando pra symbol inexistente' + (brokenUse.length ? ' -> ' + brokenUse : ''));
-assert(document.querySelectorAll('i[class*="fa-"]').length === 0, 'nenhum <i> do Font Awesome sobrou');
+/* ---------- 10. contagem regressiva ---------- */
+const countdown = document.getElementById('countdown');
+assert(!!countdown, '#countdown existe');
+assert(countdown.getAttribute('data-deadline') === DEADLINE, 'countdown com data-limite declarada');
+const unit = u => (countdown.querySelector(`[data-unit="${u}"]`) || {}).textContent;
+assert(unit('days') === '2', `contagem: dias = ${unit('days')} (esperado 2)`);
+assert(unit('hours') === '05', `contagem: horas = ${unit('hours')} (esperado 05)`);
+assert(unit('minutes') === '30', `contagem: minutos = ${unit('minutes')} (esperado 30)`);
+assert(unit('seconds') === '15', `contagem: segundos = ${unit('seconds')} (esperado 15)`);
+assert(!countdown.classList.contains('is-past'), 'evento ainda não passou (sem .is-past)');
+assert(Date.parse(DEADLINE) > Date.now(), 'a data da feira ainda está no futuro');
 
-// --- loader removido ---
-assert(!document.getElementById('loader'), 'loader não existe mais');
-assert(document.querySelectorAll('[class*="loader"]').length === 0, 'nenhum elemento de loader no DOM');
+/* ---------- 11. posters dos 12 vídeos ---------- */
+const posters = [...html.matchAll(/poster="([^"]+)"/g)].map(m => m[1]);
+assert(posters.length === 12, `12 posters declarados (${posters.length})`);
+assert(posters.every(p => p.startsWith('assets/poster/')), 'todos os posters em assets/poster/');
 
-// --- seção da feira ---
-const fair = document.getElementById('feira');
-assert(!!fair, 'seção #feira existe');
-assert(!!document.querySelector('.nav-links a[href="#feira"]'), 'menu tem link pra Feira');
-assert(!!document.querySelector('.footer-links a[href="#feira"]'), 'rodapé tem link pra Feira');
-const fairText = fair ? fair.textContent : '';
-assert(/Celebrar e Casar/.test(fairText), 'nome da feira correto');
-assert(/29 de novembro de 2026/.test(fairText), 'data da feira correta');
-assert(/9h às 21h/.test(fairText), 'horário da feira correto');
-assert(/A Casa Garcia/.test(fairText), 'local da feira correto');
-assert(/Gratuita/.test(fairText), 'informa entrada gratuita');
+/* ---------- 12. sprite íntegro ---------- */
+const symbols = new Set([...html.matchAll(/<symbol id="([^"]+)"/g)].map(m => m[1]));
+const uses = [...new Set([...html.matchAll(/<use href="#([^"]+)"/g)].map(m => m[1]))];
+const brokenUse = uses.filter(u => !symbols.has(u));
+assert(brokenUse.length === 0, `<use> sem symbol: ${brokenUse.length} (${uses.length} usos / ${symbols.size} símbolos)`);
 
-// --- contagem regressiva (relógio já mockado antes do eval) ---
-assert(!isNaN(DEADLINE), 'data-limite é válida');
-assert(DEADLINE > REAL_NOW, 'a feira ainda não passou');
-const cd = document.getElementById('countdown');
-assert(!!cd, 'elemento do countdown existe');
-const u = n => (cd.querySelector(`[data-unit="${n}"]`) || {}).textContent;
-assert(u('days') === '2', `countdown dias = ${u('days')} (esperado 2)`);
-assert(u('hours') === '05', `countdown horas = ${u('hours')} (esperado 05)`);
-assert(u('minutes') === '30', `countdown minutos = ${u('minutes')} (esperado 30)`);
-assert(u('seconds') === '15', `countdown segundos = ${u('seconds')} (esperado 15)`);
-assert(!cd.classList.contains('is-past'), 'não marca como encerrado antes da hora');
+/* ---------- 12b. FAQ ---------- */
+const faqs = [...document.querySelectorAll('details.faq-card')];
+assert(faqs.length === 4, `4 perguntas no FAQ (${faqs.length})`);
+assert(faqs.every(d => d.querySelector('summary') === d.firstElementChild),
+  'summary é o 1º filho de todo <details> (HTML válido)');
+assert(faqs.every(d => d.querySelector('summary .q')), 'toda pergunta tem título clicável');
+assert(!!document.querySelector('.faq-zap'), 'card "Não achou o que precisava?" presente');
 
-// --- posters e sprite ---
-const posterEls = [...document.querySelectorAll('video[poster]')];
-assert(posterEls.length === 12, `12 vídeos com poster (achados: ${posterEls.length})`);
-assert(posterEls.every(v => /^assets\/poster\/video\d+\.jpg$/.test(v.getAttribute('poster'))),
-  'todos os posters apontam pra assets/poster/');
+/* ---------- 13. sujeira que não pode voltar ---------- */
+assert(!/class="loader"|id="loader"/.test(html), 'sem loader');
+assert(!/class="tbd"/.test(html), 'sem dado pendente marcado');
+assert(!/font-awesome|fontawesome|cdnjs/i.test(html.replace(/<!--[\s\S]*?-->/g, '')), 'sem Font Awesome via CDN');
+assert(!/<i class="fa-/.test(html), 'sem <i> do Font Awesome');
+assert(!/unsplash|images\.pexels/i.test(html), 'sem imagem de terceiro');
 
-// --- nenhum marcador de dado pendente sobrou (CNPJ, endereço, CEP preenchidos) ---
-const tbds = document.querySelectorAll('.tbd');
-assert(tbds.length === 0, `nenhum marcador de dado pendente no HTML (achados: ${tbds.length})`);
+/* ---------- 14. links externos seguros ---------- */
+const blanks = [...document.querySelectorAll('a[target="_blank"]')];
+const semNoopener = blanks.filter(a => !/noopener/.test(a.rel || ''));
+assert(semNoopener.length === 0, `target=_blank com rel=noopener (${blanks.length} links)`);
 
-// --- resumo ---
 console.log('✔ OK (' + ok.length + ')');
 ok.forEach(t => console.log('   + ' + t));
 console.log('\n✖ PROBLEMAS (' + problems.length + ')');
 problems.forEach(t => console.log('   - ' + t));
+
 process.exit(problems.length ? 1 : 0);

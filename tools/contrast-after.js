@@ -1,58 +1,98 @@
-function hex(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));}
-function over(fg,bg,a){return fg.map((c,i)=>Math.round(a*c+(1-a)*bg[i]));}
-function lum(rgb){const s=rgb.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2];}
-function ratio(a,b){const[l1,l2]=[lum(a),lum(b)].sort((x,y)=>y-x);return (l1+0.05)/(l2+0.05);}
+/* ============================================================
+   contrast-after.js — contraste do site atual (index.html).
+   Lê os tokens de css/site.css na hora: se alguém trocar uma cor,
+   o teste reprova na hora, sem precisar de número mágico no código.
+   ============================================================ */
+const fs = require('fs');
+const path = require('path');
 
-const DARK=hex('#1A1A1A'),FOOT=hex('#111'),LIGHT=hex('#F5F5F5'),WHITE=hex('#FFFFFF');
-// tokens definidos no style.css
-const PURPLE_DARK=hex('#b06ef5');   // --primary-on-dark
-const PURPLE_LIGHT=hex('#6a0dad');  // --primary-color
-const MUTED_DARK=hex('#a3a3a3');    // --muted-on-dark
-const MUTED_LIGHT=hex('#666666');   // --text-light
-const WA=hex('#25d366'),WA_H=hex('#1eb85a'),WA_T=hex('#04240f');
+const root = path.join(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const cssRef = (html.match(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/) || [])[1] || 'css/style.css';
+const css = fs.readFileSync(path.join(root, cssRef), 'utf8');
 
-const cases=[
- ['Título "Serviços" span roxo / fundo escuro',PURPLE_DARK,DARK,true], ['Título "Contato" span roxo / fundo escuro',PURPLE_DARK,DARK,true],
- ['Subtítulo seção Contato',MUTED_DARK,DARK,false],
- ['Subtítulo seção Serviços',MUTED_DARK,DARK,false],
- ['Subtítulo seção Sobre (fundo claro)',MUTED_LIGHT,LIGHT,false],
- ['Subtítulo seção Portfólio (fundo claro)',MUTED_LIGHT,LIGHT,false],
- ['Ícone serviço SVG / fundo escuro',PURPLE_DARK,DARK,true],
- ['Título card serviço (branco)',WHITE,DARK,true],
- ['Texto card serviço rgba(.7)',over(WHITE,DARK,0.7),DARK,false],
- ['CTA "Ver vídeos" texto branco',WHITE,over(PURPLE_LIGHT,DARK,0.3),false],
- ['CTA "Ver vídeos" borda',PURPLE_DARK,over(PURPLE_LIGHT,DARK,0.3),false],
- ['Link nav hover/ativo',PURPLE_DARK,DARK,false],
- ['Item de dropdown em hover',PURPLE_DARK,over(PURPLE_LIGHT,DARK,0.2),false],
- ['Rodapé h4',PURPLE_DARK,FOOT,true],
- ['Rodapé link em hover',PURPLE_DARK,FOOT,false],
- ['Rodapé link normal rgba(.7)',over(WHITE,FOOT,0.7),FOOT,false],
- ['Rodapé .footer-bottom rgba(.5)',over(WHITE,FOOT,0.5),FOOT,false],
- ['BTN WhatsApp texto (verde da marca)',WA_T,WA,false],
- ['BTN WhatsApp hover texto',WA_T,WA_H,false],
- ['BTN flutuante WhatsApp ícone',WA_T,WA,false],
- ['Hero span roxo sobre preto',PURPLE_DARK,hex('#000000'),true],
- ['Botão outline branco sobre hero',WHITE,hex('#000000'),false],
- ['Stat número (fundo claro)',PURPLE_LIGHT,LIGHT,true],
- ['Título span seção clara',PURPLE_LIGHT,LIGHT,true],
- ['Link nav normal (branco)',WHITE,DARK,false],
- ['Modal subtítulo rgba(.7)',over(WHITE,DARK,0.7),DARK,false],
- ['Voltar ao topo: branco sobre roxo',WHITE,PURPLE_LIGHT,true],
- ['Foco/outline sobre escuro',PURPLE_DARK,DARK,false],
- ['Foco/outline sobre claro',PURPLE_LIGHT,LIGHT,false],
- ['Título seção clara #333',hex('#333333'),LIGHT,true],
-];
-
-const AA=4.5,AAA_LARGE=3.0;
-let fail=0;
-console.log('Estado    Ratio     Regra      O que');
-console.log('─'.repeat(90));
-for(const[d,fg,bg,large]of cases){
-  const r=ratio(fg,bg),need=large?AAA_LARGE:AA,pass=r>=need;
-  if(!pass)fail++;
-  console.log(`${pass?'  PASS  ':'  FAIL  '}${r.toFixed(2).padStart(6)}:1  `+
-    `>=${need} ${large?'(grande) ':'(normal) '} ${pass?'      ':'FALHA  '}${d}`);
+function hex(h) {
+  h = h.replace('#', '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
 }
-console.log('─'.repeat(90));
-console.log(`${cases.length-fail}/${cases.length} passam · ${fail} reprovados`);
-process.exit(fail?1:0);
+function over(fg, bg, a) { return fg.map((c, i) => Math.round(a * c + (1 - a) * bg[i])); }
+function lum(rgb) {
+  const s = rgb.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+}
+function ratio(a, b) { const [l1, l2] = [lum(a), lum(b)].sort((x, y) => y - x); return (l1 + 0.05) / (l2 + 0.05); }
+
+/* tokens do :root */
+const problems = [];
+const ok = [];
+const rootBlock = (css.match(/:root\s*\{([\s\S]*?)\}/) || [])[1] || '';
+const T = {};
+for (const m of rootBlock.matchAll(/--([\w-]+)\s*:\s*(#[0-9a-fA-F]{3,8})\s*;/g)) T[m[1]] = hex(m[2]);
+
+const T_KEYS = ['roxo', 'roxo-esc', 'roxo-cla', 'roxo-txt', 'fundo', 'fundo-2', 'super', 'texto', 'fraco'];
+T_KEYS.forEach(k => {
+  if (!T[k]) problems.push(`token --${k} não encontrado em ${cssRef} (o :root mudou?)`);
+});
+const t = k => T[k] || [0, 0, 0];
+
+const WHITE = [255, 255, 255];
+const MIN = 4.5;   // texto normal (WCAG AA)
+const UI = 3.0;    // componentes e bordas (não-texto)
+
+function checa(rotulo, fg, bg, min) {
+  const r = ratio(fg, bg);
+  const alvo = min || MIN;
+  if (r >= alvo) ok.push(`${rotulo}: ${r.toFixed(2)}:1 (≥ ${alvo})`);
+  else problems.push(`${rotulo}: ${r.toFixed(2)}:1 — precisa de ${alvo}:1`);
+}
+
+if (problems.length === 0) {
+  /* --- corpo do texto sobre os três fundos --- */
+  checa('texto sobre --fundo', t('texto'), t('fundo'));
+  checa('texto sobre --fundo-2', t('texto'), t('fundo-2'));
+  checa('texto sobre --super (cards)', t('texto'), t('super'));
+
+  /* --- texto fraco (descrições, legendas, rodapé) --- */
+  checa('fraco sobre --fundo', t('fraco'), t('fundo'));
+  checa('fraco sobre --fundo-2', t('fraco'), t('fundo-2'));
+  checa('fraco sobre --super', t('fraco'), t('super'));
+
+  /* --- roxo de destaque (kickers, links, números) --- */
+  checa('roxo-txt sobre --fundo', t('roxo-txt'), t('fundo'));
+  checa('roxo-txt sobre --fundo-2', t('roxo-txt'), t('fundo-2'));
+  checa('roxo-txt sobre --super', t('roxo-txt'), t('super'));
+
+  /* --- botões --- */
+  checa('branco sobre --roxo (pill do topo)', WHITE, t('roxo'));
+  checa('branco sobre --roxo-cla (hover do pill)', WHITE, t('roxo-cla'));
+  checa('--roxo-esc sobre branco (botão sólido)', t('roxo-esc'), WHITE);
+  checa('branco sobre --roxo-esc (CTA/fundo escuro)', WHITE, t('roxo-esc'));
+
+  /* --- gradiente do CTA final: os 3 stops com texto branco --- */
+  checa('CTA gradiente · stop escuro', WHITE, t('roxo-esc'));
+  checa('CTA gradiente · stop médio', WHITE, t('roxo'));
+  checa('CTA gradiente · stop claro', WHITE, t('roxo-cla'));
+
+  /* --- badge da feira: roxo 14% sobre o fundo-2 --- */
+  checa('badge roxo-txt / fundo + roxo 14%', t('roxo-txt'), over(t('roxo-txt'), t('fundo-2'), 0.14));
+
+  /* --- legenda da faixa: branco sobre a máscara (pior caso: foto branca) --- */
+  checa('legenda de foto / máscara 92% sobre branco', WHITE, over(t('fundo'), WHITE, 0.92));
+
+  /* --- números da contagem sobre --super --- */
+  checa('números da contagem sobre --super', WHITE, t('super'));
+
+  /* --- foco visível (componente, 3:1) --- */
+  checa('anel de foco roxo-txt / --fundo (UI)', t('roxo-txt'), t('fundo'), UI);
+  checa('anel de foco roxo-txt / --super (UI)', t('roxo-txt'), t('super'), UI);
+
+  /* --- bordas/decoração (3:1) --- */
+  checa('borda do card / --super (UI)', t('roxo-txt'), t('super'), UI);
+}
+
+console.log('✔ OK (' + ok.length + ')');
+ok.forEach(m => console.log('   + ' + m));
+console.log('\n✖ PROBLEMAS (' + problems.length + ')');
+problems.forEach(m => console.log('   - ' + m));
+process.exit(problems.length ? 1 : 0);
