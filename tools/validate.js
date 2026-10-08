@@ -211,7 +211,7 @@ const extImgs = [...html.matchAll(/<img\b[^>]*\b(?:src|srcset)="(https?:\/\/[^"]
 if (extImgs.length) problems.push('imagens/URLs externas: ' + extImgs.join(', '));
 else ok.push('nenhuma imagem externa (tudo é servido do próprio repositório)');
 
-// 26. cards de serviço <-> painéis do modal (1:1, com título, lista e CTA)
+// 26. cards de serviço <-> painéis do modal (1:1, com título, lista e galeria)
 const svcKeys = [...new Set([...html.matchAll(/data-open-service="([^"]+)"/g)].map(m => m[1]))];
 const panelKeys = [...new Set([...html.matchAll(/data-panel="([^"]+)"/g)].map(m => m[1]))];
 const cardWithoutPanel = svcKeys.filter(k => !panelKeys.includes(k));
@@ -234,14 +234,88 @@ const panelsNoList = panelBlocks.filter(m => !/<ul class="svc-list">/.test(m[0])
 panelsNoList.length
   ? problems.push('painéis sem lista de equipamentos: ' + panelsNoList.map(m => m[1]).join(', '))
   : ok.push('todos os painéis trazem a lista de tipos de equipamento');
-const svcNoCta = panelBlocks.filter(m => !/wa\.me\/5516981719596/.test(m[0])).map(m => m[1]);
-svcNoCta.length
-  ? problems.push('painéis sem CTA de WhatsApp: ' + svcNoCta.join(', '))
-  : ok.push('todos os painéis têm CTA de WhatsApp próprio');
+// 26b. CTA nos painéis é opcional (a conversão principal fica no hero);
+//      se um painel tiver, tem que apontar pro WhatsApp certo.
+const panelCta = panelBlocks.filter(m => /wa\.me\//.test(m[0])).map(m => m[1]);
+const panelBadCta = panelBlocks
+  .filter(m => /wa\.me\//.test(m[0]) && !/wa\.me\/5516981719596/.test(m[0]))
+  .map(m => m[1]);
+panelBadCta.length
+  ? problems.push('painéis com link de WhatsApp errado: ' + panelBadCta.join(', '))
+  : ok.push('CTA de conversão no hero' +
+      (panelCta.length ? ' e em ' + panelCta.length + ' painel(is): ' + panelCta.join(', ') : ' (painéis sem CTA)'));
 const svcNoMedia = panelBlocks.filter(m => !/data-src="/.test(m[0])).map(m => m[1]);
 svcNoMedia.length
   ? problems.push('painéis sem galeria (data-src): ' + svcNoMedia.join(', '))
   : ok.push('todos os painéis têm galeria de fotos/vídeos');
+
+// 27. a proporção declarada em <img width height> bate com o arquivo real.
+//     Tamanho errado = placeholder com altura trocada (layout salto) e foto
+//     "cortada" antes de carregar. Compara proporção, não pixels: o logo
+//     declara 50x50 (tamanho de exibição) e o arquivo tem 1039x1039.
+function imageSize(buf) {
+  if (buf.length > 24 && buf.readUInt32BE(0) === 0x89504e47) {
+    return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) }; // PNG
+  }
+  if (buf.length > 10 && buf.toString('ascii', 0, 3) === 'GIF') {
+    return { w: buf.readUInt16LE(6), h: buf.readUInt16LE(8) };
+  }
+  if (buf[0] === 0xff && buf[1] === 0xd8) { // JPEG: varre os markers até o SOF
+    for (let i = 2; i + 9 < buf.length;) {
+      if (buf[i] !== 0xff) { i++; continue; }
+      const marker = buf[i + 1];
+      if (marker === 0xff) { i++; continue; }
+      if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+      const len = buf.readUInt16BE(i + 2);
+      const isSOF = marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
+      if (isSOF) return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+      if (len < 2) break;
+      i += 2 + len;
+    }
+    return null;
+  }
+  if (buf.length > 30 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') {
+    const kind = buf.toString('ascii', 12, 16);
+    if (kind === 'VP8X') return { w: 1 + buf.readUIntLE(24, 3), h: 1 + buf.readUIntLE(27, 3) };
+    if (kind === 'VP8 ') return { w: buf.readUInt16LE(26) & 0x3fff, h: buf.readUInt16LE(28) & 0x3fff };
+    if (kind === 'VP8L') {
+      const bits = buf.readUInt32LE(21);
+      return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+    }
+  }
+  return null;
+}
+
+const imgDimsCache = new Map();
+const badRatio = [];
+let unknownDims = 0;
+let checkedDims = 0;
+for (const tag of html.match(/<img\b[^>]*>/g) || []) {
+  const src = (tag.match(/\b(?:src|data-src)="([^"]+)"/) || [])[1];
+  const aw = (tag.match(/\bwidth="(\d+)"/) || [])[1];
+  const ah = (tag.match(/\bheight="(\d+)"/) || [])[1];
+  if (!src || !aw || !ah || isRemote(src)) continue;
+  if (/\.svg$/i.test(src)) continue; // vetorial: width/height é tamanho de exibição
+  const file = path.join(root, src.split('#')[0]);
+  if (!fs.existsSync(file)) continue; // ausência já é problema no item 2
+  if (!imgDimsCache.has(file)) {
+    let real = null;
+    try { real = imageSize(fs.readFileSync(file)); } catch (e) { real = null; }
+    imgDimsCache.set(file, real);
+  }
+  const real = imgDimsCache.get(file);
+  if (!real || !real.w || !real.h) { unknownDims++; continue; }
+  checkedDims++;
+  const declared = Number(aw) / Number(ah);
+  const actual = real.w / real.h;
+  if (Math.abs(declared - actual) / actual > 0.02) {
+    badRatio.push(`${src} (HTML ${aw}x${ah} × arquivo ${real.w}x${real.h})`);
+  }
+}
+badRatio.length
+  ? problems.push('proporção de <img width height> diferente do arquivo: ' + badRatio.join(' · '))
+  : ok.push(`proporção de width/height confere com o arquivo em ${checkedDims} fotos`);
+if (unknownDims) warnings.push(`${unknownDims} imagem(ns) em formato que a checagem de proporção não sabe ler`);
 
 console.log('✔ OK (' + ok.length + ')');
 ok.forEach(t => console.log('   + ' + t));
