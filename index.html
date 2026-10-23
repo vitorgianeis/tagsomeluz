@@ -40,6 +40,12 @@
 
   <link rel="stylesheet" href="css/site.css">
   <script src="js/site.js" defer></script>
+
+  <!-- Convertz: chat de orçamento. Abre num modal por cima da página quando
+       se clica em qualquer botão com data-convertz-popup="12".
+       Precisa ficar DEPOIS do js/site.js: o teste de runtime usa o primeiro
+       <script src> do HTML como sendo o script do site. -->
+  <script id="convertz-popup-loader-12" src="https://go.convertz.app.br/api/bots/12/popup.js" defer></script>
 </head>
 <body>
 
@@ -66,7 +72,7 @@
       <li><a href="#eventos">Eventos</a></li>
       <li><a href="#faq">Dúvidas</a></li>
     </ul>
-    <a class="pill" href="https://wa.me/5516981719596" target="_blank" rel="noopener">Orçamento</a>
+    <a class="pill" data-convertz-popup="12" href="https://wa.me/5516981719596" target="_blank" rel="noopener">Orçamento</a>
     <button class="burger" id="hamburger" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">&#9776;</button>
   </div>
 </nav>
@@ -100,7 +106,7 @@
     <h1>TAG Som e Luz<span class="ponto">.</span></h1>
     <p class="hero-sub">Transformamos seu evento em uma experiência inesquecível com som, iluminação e estrutura profissional em São Carlos e região.</p>
     <div class="hero-ctas">
-      <a class="btn btn-branco" href="https://wa.me/5516981719596" target="_blank" rel="noopener">Peça seu orçamento</a>
+      <a class="btn btn-branco" data-convertz-popup="12" href="https://wa.me/5516981719596" target="_blank" rel="noopener">Peça seu orçamento</a>
       <a class="btn btn-ghost" href="#servicos">Ver serviços</a>
     </div>
   </div>
@@ -176,7 +182,7 @@
                   <li>Caixa de som BLG</li>
                   <li>Caixa acústica ativa profissional JBL</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20som%20para%20meu%20evento" target="_blank" rel="noopener">Pedir orçamento de som &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20som%20para%20meu%20evento" target="_blank" rel="noopener">Pedir orçamento de som &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <figure><img src="assets/img/Caixa De Som Acústica Line Array.webp" alt="Caixa de som em line array" width="420" height="181" loading="lazy" decoding="async"></figure>
@@ -210,7 +216,7 @@
                   <li>Máquina de fumaça e neblina</li>
                   <li>Bola luminosa de LED RGB</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20ilumina%C3%A7%C3%A3o%20para%20meu%20evento" target="_blank" rel="noopener">Pedir orçamento de luz &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20ilumina%C3%A7%C3%A3o%20para%20meu%20evento" target="_blank" rel="noopener">Pedir orçamento de luz &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <figure><img src="assets/img/8r.webp" alt="Moving head beam 8R em ação" width="2560" height="2560" loading="lazy" decoding="async"></figure>
@@ -241,7 +247,7 @@
                   <li>Transmissão ao vivo do evento</li>
                   <li>Apresentações e conteúdo de marca</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20painel%20de%20LED" target="_blank" rel="noopener">Pedir orçamento de LED &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20painel%20de%20LED" target="_blank" rel="noopener">Pedir orçamento de LED &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <video controls playsinline preload="none" poster="assets/poster/video1.jpg" data-src="assets/video/video1.mp4"></video>
@@ -278,7 +284,7 @@
                   <li>Projetores de alta potência</li>
                   <li>Telas de projeção e televisões</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20proje%C3%A7%C3%A3o" target="_blank" rel="noopener">Pedir orçamento de imagem &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20um%20or%C3%A7amento%20de%20proje%C3%A7%C3%A3o" target="_blank" rel="noopener">Pedir orçamento de imagem &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <figure><img src="assets/img/projetor epson x38.webp" alt="Projetor Epson X38" width="600" height="600" loading="lazy" decoding="async"></figure>
@@ -306,7 +312,7 @@
                   <li>Mesa de som digital Midas M32</li>
                   <li>Mesa GRAND.MA2</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20or%C3%A7amento%20de%20equipamentos" target="_blank" rel="noopener">Pedir orçamento &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20or%C3%A7amento%20de%20equipamentos" target="_blank" rel="noopener">Pedir orçamento &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <figure><img src="assets/img/ddj-wego.webp" alt="Controladora de DJ Pioneer DDJ-WeGO" width="1600" height="1067" loading="lazy" decoding="async"></figure>
@@ -337,7 +343,7 @@
                   <li>Grid</li>
                   <li>Montagem de palco e pista</li>
                 </ul>
-                <a class="link-zap" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20or%C3%A7amento%20de%20estrutura" target="_blank" rel="noopener">Pedir orçamento de estrutura &rarr;</a>
+                <a class="link-zap" data-convertz-popup="12" href="https://wa.me/5516981719596?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20or%C3%A7amento%20de%20estrutura" target="_blank" rel="noopener">Pedir orçamento de estrutura &rarr;</a>
               </div>
               <div class="svc-fotos">
                 <figure><img src="assets/img/Treliças Kit Trave Box Truss Q20.webp" alt="Kit de trave Box Truss Q20" width="588" height="900" loading="lazy" decoding="async"></figure>
