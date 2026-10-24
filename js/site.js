@@ -242,6 +242,30 @@
     timer = setInterval(tick, 1000);
   }
 
+  /* ---------- WhatsApp: mensagens centralizadas ----------
+     Os links no HTML guardam SÓ o número (https://wa.me/...), então se o
+     JS falhar o botão ainda abre a conversa — só vem sem mensagem pronta.
+     Aqui a gente monta o ?text= a partir da chave data-zap de cada link. */
+  var ZAP_NUMERO = '5516981719596';
+  var CAMPOS = 'Data do evento: \nLocal: \nTipo de festa: \nConvidados: ';
+  var ZAP_MENSAGENS = {
+    generico: 'Olá! Vim pelo site e quero um orçamento.\n\n' + CAMPOS,
+    som: 'Olá! Vim pelo site e quero um orçamento de som para meu evento.\n\n' + CAMPOS,
+    luz: 'Olá! Vim pelo site e quero um orçamento de iluminação para meu evento.\n\n' + CAMPOS,
+    led: 'Olá! Vim pelo site e quero um orçamento de painel de LED\n\n' + CAMPOS,
+    imagem: 'Olá! Vim pelo site e quero um orçamento de projeção\n\n' + CAMPOS,
+    equipamentos: 'Olá! Vim pelo site e quero orçamento de equipamentos\n\n' + CAMPOS,
+    estrutura: 'Olá! Vim pelo site e quero um orçamento de estrutura\n\n' + CAMPOS,
+    feira: 'Olá! Quero agendar uma visita no estande da TAG na Feira Celebrar e Casar.\n\nMelhor dia e horário: ',
+    duvida: 'Olá! Vim pelo site e tenho uma dúvida sobre os serviços.\n\n' + CAMPOS,
+  };
+
+  document.querySelectorAll('[data-zap]').forEach(function (a) {
+    var msg = ZAP_MENSAGENS[a.getAttribute('data-zap')];
+    if (!msg) return;
+    a.setAttribute('href', 'https://wa.me/' + ZAP_NUMERO + '?text=' + encodeURIComponent(msg));
+  });
+
   /* ---------- ano do rodapé ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
