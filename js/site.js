@@ -284,4 +284,38 @@
   /* ---------- ano do rodapé ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---------- reparo de rolagem no celular (chat do Convertz) ----------
+     No celular, digitar no chat abre o teclado, e o teclado + o
+     overflow:hidden que o script do Convertz põe no body costumam deixar a
+     página sem rolagem depois de fechar o modal — o iOS/Safari não devolve
+     o scroll sozinho nesse caso. No desktop não tem teclado, por isso não
+     aparece lá.
+
+     Não dá pra consertar no script dele (é externo), então aqui a gente
+     observa o momento em que o modal perde a classe .cf-open e força a
+     rolagem de volta. Só age se o menu mobile não estiver aberto, porque
+     aí o travamento é intencional nosso. */
+  function reparaRolagem() {
+    if (navLinks && navLinks.classList.contains('active')) return;
+    if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
+    // rolar pra mesma posição obriga o navegador a reativar a rolagem,
+    // que é o que costuma faltar no iOS depois do teclado fechar
+    window.scrollTo(window.scrollX || 0, window.scrollY || 0);
+  }
+
+  if ('MutationObserver' in window && document.body) {
+    var chatAbertoAntes = false;
+    new MutationObserver(function () {
+      var modal = document.querySelector('.cf-popup-modal');
+      if (!modal) return;
+      var aberto = modal.classList.contains('cf-open');
+      if (chatAbertoAntes && !aberto) {
+        reparaRolagem();
+        // de novo depois do teclado sumir, que é quando o scroll costuma travar
+        setTimeout(reparaRolagem, 350);
+      }
+      chatAbertoAntes = aberto;
+    }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  }
 })();
