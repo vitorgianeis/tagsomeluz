@@ -299,9 +299,16 @@
   function reparaRolagem() {
     if (navLinks && navLinks.classList.contains('active')) return;
     if (document.body.style.overflow === 'hidden') document.body.style.overflow = '';
-    // rolar pra mesma posição obriga o navegador a reativar a rolagem,
-    // que é o que costuma faltar no iOS depois do teclado fechar
-    window.scrollTo(window.scrollX || 0, window.scrollY || 0);
+
+    // behavior:'instant' é obrigatório aqui: o site tem scroll-behavior:smooth
+    // no html, e um scrollTo animado não completa numa página travada — é
+    // exatamente o estado que a gente está tentando sair.
+    var y = window.scrollY || window.pageYOffset || 0;
+    window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+
+    // No iOS, o WebKit costuma não recalcular a área rolável depois que o
+    // teclado some; o resize obriga esse recálculo.
+    window.dispatchEvent(new Event('resize'));
   }
 
   if ('MutationObserver' in window && document.body) {
