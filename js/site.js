@@ -34,9 +34,12 @@
   var fecharMenu = document.getElementById('fecharMenu');
 
   function fechaMenu() {
-    if (!navLinks || !navLinks.classList.contains('active')) return;
-    navLinks.classList.remove('active');
-    document.body.style.overflow = '';
+    if (navLinks && navLinks.classList.contains('active')) {
+      navLinks.classList.remove('active');
+    }
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
     if (hamburger) hamburger.setAttribute('aria-expanded', 'false');
   }
 
@@ -129,7 +132,9 @@
     //
     // Esse handler precisa rodar antes do do Convertz: os dois são delegados no
     // document, e o site.js carrega primeiro que o popup.js (ver index.html).
-    if (alvo && alvo.closest('[data-convertz-popup]')) fechaMenu();
+    if (alvo && alvo.closest('[data-convertz-popup]')) {
+      fechaMenu();
+    }
 
     var anchor = alvo ? alvo.closest('a[href^="#"]') : null;
     if (!anchor) return;
