@@ -116,7 +116,22 @@
   }
 
   document.addEventListener('click', function (e) {
-    var anchor = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    var alvo = e.target && e.target.closest ? e.target : null;
+
+    // Gatilho do chat do Convertz: fecha o menu ANTES do popup abrir.
+    //
+    // O script do Convertz guarda document.body.style.overflow como "valor anterior"
+    // quando o modal abre, e devolve esse valor quando fecha. Se o menu mobile ainda
+    // estiver aberto nesse momento, ele grava "hidden" como valor a restaurar — e ao
+    // fechar o chat a rolagem do fundo fica travada sem volta, porque fechaMenu() só
+    // destrava quando o menu está .active. Fechando o menu aqui, ele grava "" e a
+    // rolagem volta ao normal.
+    //
+    // Esse handler precisa rodar antes do do Convertz: os dois são delegados no
+    // document, e o site.js carrega primeiro que o popup.js (ver index.html).
+    if (alvo && alvo.closest('[data-convertz-popup]')) fechaMenu();
+
+    var anchor = alvo ? alvo.closest('a[href^="#"]') : null;
     if (!anchor) return;
 
     var href = anchor.getAttribute('href');
